@@ -1,0 +1,120 @@
+/* Sección Historia - FORZAR TEXTO CLARO */
+.historia-container,
+.historia-texto,
+.historia-texto p,
+.historia-texto strong,
+.historia-texto span,
+.cifra,
+.cifra-texto {
+    color: #e0ecd0 !important; /* Fuerza color claro */
+}
+
+.historia-texto strong {
+    color: #8fb86a !important; /* Verde más brillante para énfasis */
+    font-weight: 600;
+}
+
+.cifra-numero {
+    color: #8fb86a !important;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.cifra-texto {
+    color: #c8d8b5 !important;
+    font-size: 0.8rem;
+}
+
+.historia-imagen p {
+    color: #7ca35a !important;
+}
+
+/* ========== ESTILOS MEJORADOS PARA NAVEGACIÓN ADMIN Y MAESTRO ========== */
+.nav-admin-bar, .nav-maestro-bar {
+    background: rgba(20, 30, 18, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 60px;
+    padding: 12px 20px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    border: 1px solid rgba(124, 163, 90, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-admin-btn, .nav-maestro-btn {
+    background: rgba(15, 25, 12, 0.7);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    color: #e0ecd0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(124, 163, 90, 0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.nav-admin-btn i, .nav-maestro-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+}
+
+.nav-admin-btn:hover, .nav-maestro-btn:hover {
+    background: #7ca35a;
+    color: #0f190c;
+    transform: translateY(-3px);
+    border-color: #8fb86a;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.nav-admin-btn:hover i, .nav-maestro-btn:hover i {
+    transform: scale(1.1);
+}
+
+.nav-admin-btn:active, .nav-maestro-btn:active {
+    transform: translateY(1px);
+    transition: 0.05s;
+}
+
+.nav-admin-btn.active, .nav-maestro-btn.active {
+    background: #7ca35a;
+    color: #0f190c;
+    border-color: #8fb86a;
+    box-shadow: 0 4px 12px rgba(124, 163, 90, 0.4);
+}
+
+.nav-admin-btn.active i, .nav-maestro-btn.active i {
+    transform: scale(1.05);
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .nav-admin-bar, .nav-maestro-bar {
+        border-radius: 28px;
+        padding: 10px 15px;
+        gap: 8px;
+    }
+    .nav-admin-btn, .nav-maestro-btn {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+    }
+    .nav-admin-btn i, .nav-maestro-btn i {
+        font-size: 1rem;
+    }
+}
+
+.historia-imagen video {
+    width: 100%;
+    max-height: 250px;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
