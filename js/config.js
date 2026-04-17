@@ -15,6 +15,8 @@ window.appState = {
     galeriaActual: { imagenes: [], indice: 0, productoId: null },
     historiaGaleria: [],
     noticiaGaleriaActual: { imagenes: [], indice: 0 },
+    cicloClubActual: null,
+    gramosReservadosCiclo: 0,
     reservasChart: null,
     sociosChart: null,
     configWhatsApp: { phoneNumberId: null, accessToken: null }
