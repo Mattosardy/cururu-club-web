@@ -169,7 +169,7 @@ async function cargarProductosPublicos() {
                 </div>
                 ${renderizarEstrellas(producto.promedio, producto.totalCalificaciones)}
                 <div style="padding:15px;text-align:left;">
-                    <h3 class="producto-nombre">Nombre: ${escapeHtml(producto.nombre)}</h3>
+                    <h3 class="producto-nombre">${escapeHtml(producto.nombre)}</h3>
                     <div style="color:#111111;font-size:0.9rem;margin-bottom:10px;">${escapeHtml(indicaSativa)}</div>
                     <button class="btn-mas-info" onclick="event.stopPropagation();mostrarMasInfo('${producto.id}')" style="background:#496535;border:1px solid #496535;color:#f4f8ef;padding:8px 16px;border-radius:20px;cursor:pointer;width:100%;margin-bottom:10px;"><i class="fas fa-plus-circle"></i> Información</button>
                     <button class="btn-reservar-producto" onclick="event.stopPropagation();abrirModalDesdeBoton('${producto.id}')" style="background:#496535;border:none;color:#f4f8ef;padding:10px;border-radius:25px;cursor:pointer;font-weight:bold;width:100%;" ${!disponible ? 'disabled' : ''}><i class="fas fa-calendar-check"></i> Reservar</button>
