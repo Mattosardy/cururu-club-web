@@ -43,37 +43,59 @@
             z-index: 0;
             pointer-events: none;
         }
-        .container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 112px 20px 20px; }
         .header {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1200;
+            width: min(calc(100% - 32px), 1400px);
             background: var(--surface-strong);
             backdrop-filter: blur(15px);
             border-radius: 24px;
-            padding: 20px 30px;
-            margin-bottom: 30px;
+            padding: 14px 22px;
             border: 1px solid var(--border-soft);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            gap: 18px;
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
         }
-        .logo h1 { font-family: 'Poppins', sans-serif; font-size: 2rem; color: var(--accent-strong); }
-        .logo h1 i { margin-right: 8px; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 18px; }
+        .header-left { min-width: 0; }
+        .logo h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.75rem;
+            color: var(--accent-strong);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+        .logo-mark {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
         .user-info {
             background: rgba(240, 247, 236, 0.95);
-            padding: 8px 20px;
+            padding: 8px 14px;
             border-radius: 50px;
             color: var(--text-strong);
             display: flex;
             align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 10px;
+            white-space: nowrap;
         }
         .user-info span { color: var(--accent-strong); font-weight: bold; }
+        .header-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .btn-inicio, .btn-cerrar {
             background: rgba(236, 244, 232, 0.95);
             border: none;
-            padding: 8px 20px;
+            padding: 8px 16px;
             border-radius: 50px;
             color: var(--text-strong);
             cursor: pointer;
@@ -84,26 +106,16 @@
         .btn-inicio:hover, .btn-cerrar:hover { background: #7ca35a; color: #0f190c; transform: translateY(-2px); }
         .btn-cerrar { background: rgba(155, 106, 108, 0.8); }
         .btn-cerrar:hover { background: #9B6A6C; color: white; }
-        .nav-container {
-            background: var(--surface-strong);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 15px 25px;
-            margin-bottom: 30px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
         .nav-btn {
             background: var(--surface-soft);
             border: 1px solid var(--border-soft);
-            padding: 10px 25px;
+            padding: 8px 16px;
             border-radius: 50px;
             color: var(--text-main);
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+            white-space: nowrap;
         }
         .nav-btn:hover, .nav-btn.active { background: #7ca35a; color: #0f190c; border-color: #7ca35a; transform: translateY(-2px); }
         .section {
@@ -601,6 +613,23 @@
             padding: 25px; border: 2px solid #7ca35a;
         }
         @media (max-width: 768px) {
+            .container { padding-top: 156px; }
+            .header {
+                top: 10px;
+                width: calc(100% - 20px);
+                padding: 12px 14px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header-left, .header-right {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            .header-nav {
+                width: 100%;
+                justify-content: center;
+            }
             .section { padding: 22px 18px; }
             .section-title { font-size: 1.45rem; margin-bottom: 18px; }
             .productos-subsection { margin-top: 22px; }
@@ -647,7 +676,7 @@
             .opcion-gramo { padding: 8px 12px; font-size: 0.85rem; border-radius: 10px; }
             .historial-table { min-width: 360px; font-size: 0.82rem; }
             .historial-table th, .historial-table td { padding: 8px 6px; }
-            .nav-btn { flex: 1 1 100%; }
+            .nav-btn { flex: 1 1 auto; }
             .btn-submit, .btn-inicio, .btn-cerrar { width: 100%; }
         }
     </style>
@@ -656,24 +685,27 @@
 
 <div class="container">
     <div class="header">
-        <div class="logo">
-            <h1><i class="fas fa-frog"></i> Cururú Club</h1>
-            <p>Club Canábico · Cultura · Comunidad</p>
+        <div class="header-left">
+            <div class="logo">
+                <h1><img src="assets/images/logo.png" alt="Logo Cururú Club" class="logo-mark" onerror="this.style.display='none'"> Cururú Club</h1>
+                <p>Club Canábico · Cultura · Comunidad</p>
+            </div>
+            <div class="header-nav" id="navContainer">
+                <button class="nav-btn active" data-section="inicio">🏠 Inicio</button>
+                <button class="nav-btn" data-section="productos">🌿 Productos</button>
+                <button class="nav-btn admin-only" data-section="admin" style="display: none;">⚙️ Administrar</button>
+                <button class="nav-btn maestro-only" data-section="maestro" style="display: none;">👑 Maestro</button>
+            </div>
         </div>
-        <div class="user-info" id="userInfo">
-            <i class="fas fa-user" id="userIcon"></i> <span id="userName">Invitado</span>
-            <button id="btnLogin" class="btn-inicio" style="display: none;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-            <button id="btnLogout" class="btn-cerrar" style="display: none;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+        <div class="header-right">
+            <div class="user-info" id="userInfo">
+                <i class="fas fa-user" id="userIcon"></i> <span id="userName">Invitado</span>
+                <button id="btnLogin" class="btn-inicio" style="display: none;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
+                <button id="btnLogout" class="btn-cerrar" style="display: none;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </div>
         </div>
     </div>
-    
-    <div class="nav-container" id="navContainer">
-        <button class="nav-btn active" data-section="inicio">🏠 Inicio</button>
-        <button class="nav-btn" data-section="productos">🌿 Productos</button>
-        <button class="nav-btn admin-only" data-section="admin" style="display: none;">⚙️ Administrar</button>
-        <button class="nav-btn maestro-only" data-section="maestro" style="display: none;">👑 Maestro</button>
-    </div>
-    
+
     <!-- INICIO -->
     <div id="inicio" class="section">
         <div class="historia-container">
