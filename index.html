@@ -600,6 +600,19 @@
             padding: 25px; border: 2px solid #7ca35a;
         }
         @media (max-width: 768px) {
+            .section { padding: 22px 18px; }
+            .section-title { font-size: 1.45rem; margin-bottom: 18px; }
+            .productos-subsection { margin-top: 22px; }
+            .calendario-grid { grid-template-columns: 1fr; gap: 14px; }
+            .entrega-card { padding: 16px; border-radius: 14px; }
+            .entrega-fecha { font-size: 1.2rem; margin: 8px 0; }
+            .estado-reserva { margin-top: 12px; padding: 7px 10px; font-size: 0.9rem; }
+            .opciones-gramos { gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+            .opcion-gramo { padding: 9px 14px; font-size: 0.92rem; }
+            .historial-table { font-size: 0.9rem; }
+            .historial-table th, .historial-table td { padding: 10px 8px; }
+            #historialContainer { overflow-x: auto; }
+            .historial-table { min-width: 420px; }
             .modal { padding: 10px; align-items: flex-start; }
             .modal-content { width: 100%; max-width: 100%; max-height: calc(100dvh - 20px); margin-top: 10px; border-radius: 20px; padding: 16px; }
             .modal-imagen { max-height: 32dvh; border-radius: 14px; }
@@ -612,7 +625,18 @@
             .admin-chart-card { min-height: 200px; }
         }
         @media (max-width: 520px) {
+            .section { padding: 18px 14px; border-radius: 20px; }
+            .section-title { font-size: 1.2rem; gap: 8px; }
             .productos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .productos-subsection { margin-top: 18px; }
+            .entrega-card { padding: 13px; border-radius: 12px; }
+            .entrega-titulo { font-size: 0.92rem; }
+            .entrega-fecha { font-size: 1rem; line-height: 1.25; }
+            .estado-reserva { font-size: 0.82rem; padding: 7px 8px; }
+            .opciones-gramos { gap: 8px; }
+            .opcion-gramo { padding: 8px 12px; font-size: 0.85rem; border-radius: 10px; }
+            .historial-table { min-width: 360px; font-size: 0.82rem; }
+            .historial-table th, .historial-table td { padding: 8px 6px; }
             .nav-btn { flex: 1 1 100%; }
             .btn-submit, .btn-inicio, .btn-cerrar { width: 100%; }
         }
