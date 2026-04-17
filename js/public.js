@@ -168,7 +168,7 @@ async function cargarProductosPublicos() {
                     <img src="${imagenPrincipal}" alt="${escapeHtml(producto.nombre)}" style="width:100%;height:160px;object-fit:cover;" onerror="this.onerror=null; this.src='${obtenerImagenFallback(producto) || crearPlaceholderConstruccion('Sitio en construcción')}';">
                 </div>
                 ${renderizarEstrellas(producto.promedio, producto.totalCalificaciones)}
-                <div style="padding:15px;text-align:left;">
+                <div class="producto-detalle">
                     <h3 class="producto-nombre">${escapeHtml(producto.nombre)}</h3>
                     <div style="color:#111111;font-size:0.9rem;margin-bottom:10px;">${escapeHtml(indicaSativa)}</div>
                     <button class="btn-mas-info" onclick="event.stopPropagation();mostrarMasInfo('${producto.id}')" style="background:#496535;border:1px solid #496535;color:#f4f8ef;padding:8px 16px;border-radius:20px;cursor:pointer;width:100%;margin-bottom:10px;"><i class="fas fa-plus-circle"></i> Información</button>
