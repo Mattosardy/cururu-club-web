@@ -73,7 +73,15 @@
             box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
         }
         .header-left, .header-right { display: flex; align-items: center; gap: 18px; }
-        .header-left { min-width: 0; }
+        .header-left {
+            min-width: 0;
+            flex: 1 1 auto;
+            justify-content: space-between;
+        }
+        .header-right {
+            flex: 0 0 auto;
+            justify-content: flex-end;
+        }
         .logo h1 {
             font-family: 'Poppins', sans-serif;
             font-size: 1.75rem;
@@ -101,7 +109,14 @@
             white-space: nowrap;
         }
         .user-info span { color: var(--accent-strong); font-weight: bold; }
-        .header-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1 1 auto;
+        }
         .mobile-brand { display: none; }
         .mobile-hidden-dock { display: none; }
         .btn-inicio, .btn-cerrar {
