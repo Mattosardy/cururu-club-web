@@ -21,13 +21,72 @@ function renderizarPreviewImagenes(files, previewId) {
     preview.style.gap = '10px';
 }
 
+const MAX_IMAGENES_POR_CONTENIDO = 3;
+const archivosAcumuladosPorInput = {};
+
+function obtenerClaveArchivo(file) {
+    return [file?.name || '', file?.size || 0, file?.lastModified || 0].join('__');
+}
+
+function sincronizarInputConArchivos(input, files = []) {
+    if (!input) return;
+    const dataTransfer = new DataTransfer();
+    Array.from(files || []).forEach((file) => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+}
+
+function obtenerArchivosAcumulados(inputId) {
+    return archivosAcumuladosPorInput[inputId] || [];
+}
+
+function validarMaximoImagenes(urls = [], files = null, contexto = 'contenido') {
+    const total = (urls?.length || 0) + (files?.length || 0);
+    if (total > MAX_IMAGENES_POR_CONTENIDO) {
+        throw new Error(`Solo se permiten hasta ${MAX_IMAGENES_POR_CONTENIDO} imagenes por ${contexto}.`);
+    }
+}
+
+function configurarInputImagenesConLimite(inputId, previewId, contexto) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    archivosAcumuladosPorInput[inputId] = [];
+    input.addEventListener('change', (event) => {
+        const nuevos = Array.from(event.target.files || []);
+        if (!nuevos.length) return;
+
+        const actuales = obtenerArchivosAcumulados(inputId);
+        const mapa = new Map(actuales.map((file) => [obtenerClaveArchivo(file), file]));
+        nuevos.forEach((file) => {
+            mapa.set(obtenerClaveArchivo(file), file);
+        });
+        const acumulados = Array.from(mapa.values());
+
+        if (acumulados.length > MAX_IMAGENES_POR_CONTENIDO) {
+            mostrarMensaje(`Solo podes seleccionar hasta ${MAX_IMAGENES_POR_CONTENIDO} imagenes para ${contexto}.`, false);
+            sincronizarInputConArchivos(event.target, actuales);
+            return;
+        }
+
+        archivosAcumuladosPorInput[inputId] = acumulados;
+        sincronizarInputConArchivos(event.target, acumulados);
+        renderizarPreviewImagenes(acumulados, previewId);
+    });
+}
+
 async function subirMultiplesImagenes(bucket, files, prefijo) {
     const imagenes = [];
     for (const file of Array.from(files || [])) {
         const ext = file.name.split('.').pop();
         const fileName = `${prefijo}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
         const { error } = await supabaseClient.storage.from(bucket).upload(fileName, file);
-        if (error) throw error;
+        if (error) {
+            const mensaje = String(error.message || '').toLowerCase();
+            const bucketFaltante = error.statusCode === '400' || error.statusCode === 400 || mensaje.includes('bucket') || mensaje.includes('not found');
+            if (bucketFaltante) {
+                throw new Error(`No existe o no esta listo el bucket "${bucket}" en Supabase Storage.`);
+            }
+            throw error;
+        }
         imagenes.push(supabaseClient.storage.from(bucket).getPublicUrl(fileName).data.publicUrl);
     }
     return imagenes;
@@ -102,9 +161,7 @@ async function cargarNoticiasAdmin() {
         ` : '<div class="loading">No hay noticias todavia.</div>'}
     `;
 
-    document.getElementById('noticiaImagenAdmin')?.addEventListener('change', (event) => {
-        renderizarPreviewImagenes(event.target.files, 'noticiaPreview');
-    });
+    configurarInputImagenesConLimite('noticiaImagenAdmin', 'noticiaPreview', 'noticias');
 
     document.getElementById('formNoticiaAdmin')?.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -259,9 +316,7 @@ async function cargarProductosAdmin() {
         ` : '<div class="loading">No hay productos todavia.</div>'}
     `;
 
-    document.getElementById('productoImagenFileAdmin')?.addEventListener('change', (event) => {
-        renderizarPreviewImagenes(event.target.files, 'productoPreview');
-    });
+    configurarInputImagenesConLimite('productoImagenFileAdmin', 'productoPreview', 'productos');
 
     document.getElementById('formProductoAdmin')?.addEventListener('submit', async (event) => {
         event.preventDefault();

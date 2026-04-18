@@ -112,7 +112,14 @@ window.cambiarImagenGaleria = function(direccion) {
     const nuevoIndice = appState.galeriaActual.indice + direccion;
     if (nuevoIndice < 0 || nuevoIndice >= appState.galeriaActual.imagenes.length) return;
     appState.galeriaActual.indice = nuevoIndice;
-    document.getElementById('modalImagenGaleria').src = appState.galeriaActual.imagenes[nuevoIndice];
+    const imagenPrincipal = document.getElementById('modalImagenGaleria');
+    if (imagenPrincipal) {
+        imagenPrincipal.onerror = function onErrorImagen() {
+            this.onerror = null;
+            this.src = obtenerImagenFallback(appState.productoModalActual) || crearPlaceholderConstruccion('Sitio en construcción');
+        };
+        imagenPrincipal.src = appState.galeriaActual.imagenes[nuevoIndice];
+    }
     document.querySelectorAll('.galeria-dot').forEach((dot, index) => {
         dot.style.background = index === nuevoIndice ? '#7ca35a' : 'rgba(255,255,255,0.5)';
     });
@@ -121,7 +128,14 @@ window.cambiarImagenGaleria = function(direccion) {
 window.irAImagen = function(indice) {
     if (!appState.galeriaActual?.imagenes?.length) return;
     appState.galeriaActual.indice = indice;
-    document.getElementById('modalImagenGaleria').src = appState.galeriaActual.imagenes[indice];
+    const imagenPrincipal = document.getElementById('modalImagenGaleria');
+    if (imagenPrincipal) {
+        imagenPrincipal.onerror = function onErrorImagen() {
+            this.onerror = null;
+            this.src = obtenerImagenFallback(appState.productoModalActual) || crearPlaceholderConstruccion('Sitio en construcción');
+        };
+        imagenPrincipal.src = appState.galeriaActual.imagenes[indice];
+    }
     document.querySelectorAll('.galeria-dot').forEach((dot, index) => {
         dot.style.background = index === indice ? '#7ca35a' : 'rgba(255,255,255,0.5)';
     });
@@ -134,7 +148,13 @@ window.seleccionarImagenProducto = function(indice) {
 
     appState.galeriaActual.indice = indice;
     const principal = document.getElementById('modalImagenGaleria');
-    if (principal) principal.src = imagen;
+    if (principal) {
+        principal.onerror = function onErrorImagen() {
+            this.onerror = null;
+            this.src = obtenerImagenFallback(appState.productoModalActual) || crearPlaceholderConstruccion('Sitio en construcción');
+        };
+        principal.src = imagen;
+    }
 
     document.querySelectorAll('#modalMedia .galeria-thumb').forEach((thumb, thumbIndex) => {
         thumb.classList.toggle('activa', thumbIndex === indice);
