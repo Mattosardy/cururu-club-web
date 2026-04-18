@@ -758,6 +758,8 @@
             }
             .header-nav [data-section="inicio"],
             .header-nav [data-section="productos"],
+            .header-nav [data-section="admin"],
+            .header-nav [data-section="maestro"],
             #mobileBtnLogin {
                 display: none !important;
             }
@@ -889,6 +891,8 @@
                 <div class="mobile-hidden-dock">
                     <button class="dock-btn" data-section="inicio" id="dockBtnInicio"><i class="fas fa-house"></i><span>Inicio</span></button>
                     <button class="dock-btn" data-section="productos" id="dockBtnProductos"><i class="fas fa-leaf"></i><span>Productos</span></button>
+                    <button class="dock-btn admin-only" data-section="admin" id="dockBtnAdmin" style="display: none;"><i class="fas fa-sliders"></i><span>Admin</span></button>
+                    <button class="dock-btn maestro-only" data-section="maestro" id="dockBtnMaestro" style="display: none;"><i class="fas fa-crown"></i><span>Maestro</span></button>
                     <button id="dockBtnLogin" class="dock-btn" style="display: none;"><i class="fas fa-sign-in-alt"></i><span>Ingresar</span></button>
                 </div>
                 <button id="btnLogin" class="btn-inicio" style="display: none;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
