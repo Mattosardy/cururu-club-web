@@ -19,11 +19,13 @@ function mostrarPanelForgot() {
 function actualizarBotonesSesion(autenticado) {
     const desktopLogin = document.getElementById('btnLogin');
     const mobileLogin = document.getElementById('mobileBtnLogin');
+    const dockLogin = document.getElementById('dockBtnLogin');
     const desktopLogout = document.getElementById('btnLogout');
     const mobileLogout = document.getElementById('mobileBtnLogout');
 
     if (desktopLogin) desktopLogin.style.display = autenticado ? 'none' : 'inline-block';
     if (mobileLogin) mobileLogin.style.display = autenticado ? 'none' : 'flex';
+    if (dockLogin) dockLogin.style.display = autenticado ? 'none' : 'flex';
     if (desktopLogout) desktopLogout.style.display = autenticado ? 'inline-block' : 'none';
     if (mobileLogout) mobileLogout.style.display = autenticado ? 'flex' : 'none';
 }

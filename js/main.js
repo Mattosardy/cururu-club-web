@@ -124,9 +124,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btnLogout')?.addEventListener('click', cerrarSesionHandler);
     document.getElementById('mobileBtnLogin')?.addEventListener('click', iniciarSesion);
     document.getElementById('mobileBtnLogout')?.addEventListener('click', cerrarSesionHandler);
+    document.getElementById('dockBtnLogin')?.addEventListener('click', iniciarSesion);
 
     document.querySelectorAll('.nav-btn').forEach((btn) => {
         if (btn.id === 'mobileBtnLogin' || btn.id === 'mobileBtnLogout') return;
+        btn.addEventListener('click', () => mostrarSeccion(btn.dataset.section));
+    });
+    document.querySelectorAll('.mobile-hidden-dock .dock-btn[data-section]').forEach((btn) => {
+        if (btn.id === 'dockBtnLogin') return;
         btn.addEventListener('click', () => mostrarSeccion(btn.dataset.section));
     });
 

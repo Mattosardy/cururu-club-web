@@ -103,6 +103,7 @@
         .user-info span { color: var(--accent-strong); font-weight: bold; }
         .header-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .mobile-brand { display: none; }
+        .mobile-hidden-dock { display: none; }
         .btn-inicio, .btn-cerrar {
             background: rgba(236, 244, 232, 0.95);
             border: none;
@@ -714,20 +715,19 @@
                 max-width: 24ch;
             }
             .header-right {
-                display: none;
+                display: block;
             }
             .user-info {
-                width: auto;
+                width: 100%;
                 min-width: 0;
-                justify-content: flex-end;
-                padding: 8px 10px;
+                justify-content: center;
+                padding: 0;
                 gap: 8px;
-                border-radius: 18px;
+                border-radius: 0;
+                background: transparent;
             }
             .user-info span {
-                max-width: 84px;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                display: none;
             }
             .btn-inicio, .btn-cerrar {
                 width: auto;
@@ -739,6 +739,34 @@
             .btn-inicio i, .btn-cerrar i {
                 margin: 0;
                 font-size: 1rem;
+            }
+            .mobile-hidden-dock {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+                width: 100%;
+            }
+            .mobile-hidden-dock .dock-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                min-height: 44px;
+                padding: 10px 8px;
+                border: 1px solid var(--border-soft);
+                border-radius: 14px;
+                background: rgba(236, 244, 232, 0.95);
+                color: var(--text-strong);
+                font-size: 0.76rem;
+                cursor: pointer;
+            }
+            .mobile-hidden-dock .dock-btn i {
+                font-size: 0.95rem;
+            }
+            .header-nav [data-section="inicio"],
+            .header-nav [data-section="productos"],
+            #mobileBtnLogin {
+                display: none !important;
             }
             .nav-btn {
                 text-align: center;
@@ -816,8 +844,13 @@
                 font-size: 0.78rem;
                 padding: 10px 12px;
             }
+            .mobile-hidden-dock .dock-btn {
+                min-height: 42px;
+                font-size: 0.72rem;
+                padding: 9px 6px;
+            }
             .user-info {
-                padding: 8px 10px;
+                padding: 0;
                 gap: 8px;
             }
             .productos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -871,6 +904,11 @@
         <div class="header-right">
             <div class="user-info" id="userInfo">
                 <i class="fas fa-user" id="userIcon"></i> <span id="userName">Invitado</span>
+                <div class="mobile-hidden-dock">
+                    <button class="dock-btn" data-section="inicio" id="dockBtnInicio"><i class="fas fa-house"></i><span>Inicio</span></button>
+                    <button class="dock-btn" data-section="productos" id="dockBtnProductos"><i class="fas fa-leaf"></i><span>Productos</span></button>
+                    <button id="dockBtnLogin" class="dock-btn" style="display: none;"><i class="fas fa-sign-in-alt"></i><span>Ingresar</span></button>
+                </div>
                 <button id="btnLogin" class="btn-inicio" style="display: none;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
                 <button id="btnLogout" class="btn-cerrar" style="display: none;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
             </div>
