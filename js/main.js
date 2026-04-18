@@ -1,5 +1,6 @@
 const mainSections = ['inicio', 'productos', 'admin', 'maestro', 'login'];
 const restrictedSections = {
+    productos: ['socio', 'admin', 'maestro'],
     admin: ['admin', 'maestro'],
     maestro: ['maestro']
 };
