@@ -18,13 +18,11 @@ function mostrarPanelForgot() {
 
 function actualizarBotonesSesion(autenticado) {
     const desktopLogin = document.getElementById('btnLogin');
-    const mobileLogin = document.getElementById('mobileBtnLogin');
     const dockLogin = document.getElementById('dockBtnLogin');
     const desktopLogout = document.getElementById('btnLogout');
     const mobileLogout = document.getElementById('mobileBtnLogout');
 
     if (desktopLogin) desktopLogin.style.display = autenticado ? 'none' : 'inline-block';
-    if (mobileLogin) mobileLogin.style.display = autenticado ? 'none' : 'flex';
     if (dockLogin) dockLogin.style.display = autenticado ? 'none' : 'flex';
     if (desktopLogout) desktopLogout.style.display = autenticado ? 'inline-block' : 'none';
     if (mobileLogout) mobileLogout.style.display = autenticado ? 'flex' : 'none';
@@ -39,12 +37,11 @@ async function actualizarUIporRol() {
         if (socio.success && socio.data) {
             appState.rolUsuario = socio.data.rol || 'socio';
             appState.socioData = socio.data;
-            document.getElementById('userName').innerHTML =
-                `<i class="fas fa-${appState.rolUsuario === 'maestro' ? 'crown' : (appState.rolUsuario === 'admin' ? 'user-shield' : 'user')}"></i> ${escapeHtml(socio.data.nombre)} ${escapeHtml(socio.data.apellido)}`;
+            document.getElementById('userName').textContent = `${escapeHtml(socio.data.nombre)} ${escapeHtml(socio.data.apellido)}`;
         } else {
             appState.rolUsuario = 'socio';
             appState.socioData = null;
-            document.getElementById('userName').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(usuario.email)}`;
+            document.getElementById('userName').textContent = escapeHtml(usuario.email);
         }
         actualizarBotonesSesion(true);
     } else {
@@ -52,7 +49,7 @@ async function actualizarUIporRol() {
         appState.socioData = null;
         appState.gramosReservadosCiclo = 0;
         appState.cicloClubActual = null;
-        document.getElementById('userName').innerHTML = '<i class="fas fa-user"></i> Invitado';
+        document.getElementById('userName').textContent = 'Invitado';
         actualizarBotonesSesion(false);
         mostrarPanelLogin();
     }
