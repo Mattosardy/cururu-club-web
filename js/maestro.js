@@ -75,7 +75,7 @@ function renderizarEditorHistoria(container, opciones = {}) {
             <div class="form-group full-width">
                 <label>Subir video</label>
                 <input type="file" id="${prefijo}VideoFile" accept="video/*" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">
-                <small style="color:#a0b890; display:block; margin-top:8px;">Si cargás imagenes, la web muestra primero las fotos. Si no hay imagenes, usa este video.</small>
+                <small style="color:#5f7f45; display:block; margin-top:8px;">Si cargás imagenes, la web muestra primero las fotos. Si no hay imagenes, usa este video.</small>
             </div>
             <div class="form-group full-width">
                 <label>Imagenes de historia por URL (una por linea)</label>
