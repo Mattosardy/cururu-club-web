@@ -74,7 +74,7 @@ async function actualizarUIporRol() {
     if (appState.rolUsuario !== 'invitado' && appState.socioData?.id && typeof cargarReservasSocio === 'function') {
         await cargarReservasSocio();
     }
-    if (appState.rolUsuario === 'admin' && typeof cargarAdminData === 'function') {
+    if ((appState.rolUsuario === 'admin' || appState.rolUsuario === 'maestro') && typeof cargarAdminData === 'function') {
         await cargarAdminData();
     }
     if (appState.rolUsuario === 'maestro' && typeof cargarMaestroDataCompleta === 'function') {

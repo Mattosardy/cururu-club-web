@@ -11,9 +11,15 @@ function usuarioPuedeVerSeccion(seccionId) {
     return rolesPermitidos.includes(appState.rolUsuario);
 }
 
-function mostrarSeccion(seccionId) {
+async function mostrarSeccion(seccionId) {
     const seccionValida = mainSections.includes(seccionId) ? seccionId : 'inicio';
     const destino = usuarioPuedeVerSeccion(seccionValida) ? seccionValida : 'inicio';
+    if (destino === 'admin' && (appState.rolUsuario === 'admin' || appState.rolUsuario === 'maestro') && typeof cargarAdminData === 'function') {
+        await ejecutarCargaSegura('cargarAdminData', cargarAdminData);
+    }
+    if (destino === 'maestro' && appState.rolUsuario === 'maestro' && typeof cargarMaestroDataCompleta === 'function') {
+        await ejecutarCargaSegura('cargarMaestroDataCompleta', cargarMaestroDataCompleta);
+    }
     mainSections.forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -128,11 +134,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelectorAll('.nav-btn').forEach((btn) => {
         if (btn.id === 'mobileBtnLogout') return;
-        btn.addEventListener('click', () => mostrarSeccion(btn.dataset.section));
+        btn.addEventListener('click', async () => {
+            await mostrarSeccion(btn.dataset.section);
+        });
     });
     document.querySelectorAll('.mobile-hidden-dock .dock-btn[data-section]').forEach((btn) => {
         if (btn.id === 'dockBtnLogin') return;
-        btn.addEventListener('click', () => mostrarSeccion(btn.dataset.section));
+        btn.addEventListener('click', async () => {
+            await mostrarSeccion(btn.dataset.section);
+        });
     });
 
     document.getElementById('tabLogin')?.addEventListener('click', () => {
@@ -165,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         mostrarMensaje('Login exitoso', true);
         await verificarSesion();
-        mostrarSeccion('inicio');
+        await mostrarSeccion('inicio');
     });
 
     document.getElementById('formRegisterMagic')?.addEventListener('submit', async (event) => {
@@ -183,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     await verificarSesion();
-    mostrarSeccion(localStorage.getItem('cururu_seccion_activa') || 'inicio');
+    await mostrarSeccion(localStorage.getItem('cururu_seccion_activa') || 'inicio');
 });
 
 console.log('Main loaded');

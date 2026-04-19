@@ -1,5 +1,162 @@
 const seccionesMaestroImplementadas = ['historia', 'socios', 'config'];
 
+async function subirArchivoPublico(bucket, file, prefijo) {
+    if (!file) return '';
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const fileName = `${prefijo}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabaseClient.storage.from(bucket).upload(fileName, file);
+    if (error) {
+        const mensaje = String(error.message || '').toLowerCase();
+        const bucketFaltante = error.statusCode === '400' || error.statusCode === 400 || mensaje.includes('bucket') || mensaje.includes('not found');
+        if (bucketFaltante) {
+            throw new Error(`No existe o no esta listo el bucket "${bucket}" en Supabase Storage.`);
+        }
+        throw error;
+    }
+    return supabaseClient.storage.from(bucket).getPublicUrl(fileName).data.publicUrl;
+}
+
+function obtenerConfigHistoriaPredeterminada() {
+    return {
+        texto: 'nacio como un espacio de encuentro para la comunidad cannabica en Uruguay.',
+        socios: '38',
+        cepas: '120',
+        anios: '8',
+        videoUrl: '',
+        imagenes: []
+    };
+}
+
+async function obtenerConfigHistoriaActual() {
+    const configMap = await cargarContenidoInstitucional();
+    const predeterminada = obtenerConfigHistoriaPredeterminada();
+    return {
+        texto: configMap.historia_texto || predeterminada.texto,
+        socios: configMap.cifra_socios || predeterminada.socios,
+        cepas: configMap.cifra_cepas || predeterminada.cepas,
+        anios: configMap.cifra_anios || predeterminada.anios,
+        videoUrl: configMap.historia_video_url || predeterminada.videoUrl,
+        imagenes: normalizarListaImagenes(configMap.historia_galeria || '[]')
+    };
+}
+
+function renderizarEditorHistoria(container, opciones = {}) {
+    if (!container) return;
+    const {
+        titulo = 'Editar historia',
+        prefijo = 'historia',
+        botonGuardar = 'guardarHistoriaMaestro',
+        configHistoria = obtenerConfigHistoriaPredeterminada()
+    } = opciones;
+
+    container.innerHTML = `
+        <h3 style="color:#e0ecd0;">${escapeHtml(titulo)}</h3>
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>Texto principal</label>
+                <textarea id="${prefijo}Texto" rows="6" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">${escapeHtml(configHistoria.texto)}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Socios activos</label>
+                <input type="number" id="${prefijo}Socios" value="${escapeHtml(configHistoria.socios)}">
+            </div>
+            <div class="form-group">
+                <label>Cepas cultivadas</label>
+                <input type="number" id="${prefijo}Cepas" value="${escapeHtml(configHistoria.cepas)}">
+            </div>
+            <div class="form-group">
+                <label>Anios de experiencia</label>
+                <input type="number" id="${prefijo}Anios" value="${escapeHtml(configHistoria.anios)}">
+            </div>
+            <div class="form-group full-width">
+                <label>Video por URL</label>
+                <input type="url" id="${prefijo}VideoUrl" value="${escapeHtml(configHistoria.videoUrl)}" placeholder="https://.../video.mp4">
+            </div>
+            <div class="form-group full-width">
+                <label>Subir video</label>
+                <input type="file" id="${prefijo}VideoFile" accept="video/*" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">
+                <small style="color:#a0b890; display:block; margin-top:8px;">Si cargás imagenes, la web muestra primero las fotos. Si no hay imagenes, usa este video.</small>
+            </div>
+            <div class="form-group full-width">
+                <label>Imagenes de historia por URL (una por linea)</label>
+                <textarea id="${prefijo}ImagenesUrls" rows="4" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">${escapeHtml(configHistoria.imagenes.join('\n'))}</textarea>
+            </div>
+            <div class="form-group full-width">
+                <label>Subir varias imagenes</label>
+                <input type="file" id="${prefijo}ImagenesFiles" accept="image/*" multiple style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">
+                <div id="${prefijo}ImagenesPreview" style="margin-top: 12px;"></div>
+            </div>
+            <div class="form-group full-width">
+                <button class="btn-submit" onclick="${botonGuardar}()">Guardar cambios</button>
+            </div>
+        </div>
+        <div id="${prefijo}Mensaje" style="margin-top: 15px;"></div>
+    `;
+
+    if (typeof configurarInputImagenesConLimite === 'function') {
+        configurarInputImagenesConLimite(`${prefijo}ImagenesFiles`, `${prefijo}ImagenesPreview`, 'historia');
+    }
+}
+
+async function guardarHistoriaDesdeEditor(prefijo = 'historia') {
+    const texto = document.getElementById(`${prefijo}Texto`)?.value?.trim();
+    const socios = document.getElementById(`${prefijo}Socios`)?.value?.trim();
+    const cepas = document.getElementById(`${prefijo}Cepas`)?.value?.trim();
+    const anios = document.getElementById(`${prefijo}Anios`)?.value?.trim();
+    const videoUrlManual = document.getElementById(`${prefijo}VideoUrl`)?.value?.trim() || '';
+    const urlsManual = (document.getElementById(`${prefijo}ImagenesUrls`)?.value || '')
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    const archivos = typeof obtenerArchivosAcumulados === 'function'
+        ? obtenerArchivosAcumulados(`${prefijo}ImagenesFiles`)
+        : document.getElementById(`${prefijo}ImagenesFiles`)?.files;
+    const videoFile = document.getElementById(`${prefijo}VideoFile`)?.files?.[0];
+    const mensajeDiv = document.getElementById(`${prefijo}Mensaje`);
+
+    if (!texto) {
+        if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#e0b8a0;">El texto principal no puede estar vacio.</p>';
+        return false;
+    }
+
+    validarMaximoImagenes(urlsManual, archivos, 'historia');
+
+    let imagenesHistoria = [...urlsManual];
+    if (archivos?.length) {
+        const subidas = await subirMultiplesImagenes('noticias', archivos, 'historia');
+        imagenesHistoria = [...imagenesHistoria, ...subidas];
+    }
+
+    let videoHistoria = videoUrlManual;
+    if (videoFile) {
+        videoHistoria = await subirArchivoPublico('noticias', videoFile, 'historia_video');
+    }
+
+    const updates = [
+        { clave: 'historia_texto', valor: texto },
+        { clave: 'cifra_socios', valor: socios || '0' },
+        { clave: 'cifra_cepas', valor: cepas || '0' },
+        { clave: 'cifra_anios', valor: anios || '0' },
+        { clave: 'historia_video_url', valor: videoHistoria || '' },
+        { clave: 'historia_galeria', valor: JSON.stringify(imagenesHistoria) }
+    ];
+    for (const item of updates) {
+        const { error } = await supabaseClient.from('configuracion_sistema').upsert(item, { onConflict: 'clave' });
+        if (error) throw error;
+    }
+
+    aplicarContenidoInstitucional({
+        historia_texto: texto,
+        cifra_socios: socios || '0',
+        cifra_cepas: cepas || '0',
+        cifra_anios: anios || '0',
+        historia_video_url: videoHistoria || '',
+        historia_galeria: JSON.stringify(imagenesHistoria)
+    });
+    if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#8fb86a;">Historia actualizada correctamente.</p>';
+    return true;
+}
+
 async function cargarMaestroDataCompleta() {
     const cards = document.getElementById('maestroCards');
     if (!cards) return;
@@ -19,104 +176,20 @@ async function cargarMaestroDataCompleta() {
 async function cargarMaestroHistoria() {
     const container = document.getElementById('maestro-historia');
     if (!container) return;
-
-    const configMap = await cargarContenidoInstitucional();
-    const historiaTexto = configMap.historia_texto || 'nacio como un espacio de encuentro para la comunidad cannabica en Uruguay.';
-    const cifraSocios = configMap.cifra_socios || '38';
-    const cifraCepas = configMap.cifra_cepas || '120';
-    const cifraAnios = configMap.cifra_anios || '8';
-    const historiaGaleria = configMap.historia_galeria || '[]';
-    const imagenesHistoria = normalizarListaImagenes(historiaGaleria);
-
-    container.innerHTML = `
-        <h3 style="color:#e0ecd0;">Editar historia</h3>
-        <div class="form-grid">
-            <div class="form-group full-width">
-                <label>Texto principal</label>
-                <textarea id="historiaTexto" rows="6" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">${escapeHtml(historiaTexto)}</textarea>
-            </div>
-            <div class="form-group">
-                <label>Socios activos</label>
-                <input type="number" id="cifraSocios" value="${escapeHtml(cifraSocios)}">
-            </div>
-            <div class="form-group">
-                <label>Cepas cultivadas</label>
-                <input type="number" id="cifraCepas" value="${escapeHtml(cifraCepas)}">
-            </div>
-            <div class="form-group">
-                <label>Anios de experiencia</label>
-                <input type="number" id="cifraAnios" value="${escapeHtml(cifraAnios)}">
-            </div>
-            <div class="form-group full-width">
-                <label>Imagenes de historia por URL (una por linea)</label>
-                <textarea id="historiaImagenesUrls" rows="4" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">${escapeHtml(imagenesHistoria.join('\n'))}</textarea>
-            </div>
-            <div class="form-group full-width">
-                <label>Subir varias imagenes</label>
-                <input type="file" id="historiaImagenesFiles" accept="image/*" multiple style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">
-                <div id="historiaImagenesPreview" style="margin-top: 12px;"></div>
-            </div>
-            <div class="form-group full-width">
-                <button class="btn-submit" onclick="guardarHistoriaMaestro()">Guardar cambios</button>
-            </div>
-        </div>
-        <div id="historiaMensaje" style="margin-top: 15px;"></div>
-    `;
-
-    if (typeof configurarInputImagenesConLimite === 'function') {
-        configurarInputImagenesConLimite('historiaImagenesFiles', 'historiaImagenesPreview', 'historia');
-    }
+    const configHistoria = await obtenerConfigHistoriaActual();
+    renderizarEditorHistoria(container, {
+        titulo: 'Editar historia',
+        prefijo: 'maestroHistoria',
+        botonGuardar: 'guardarHistoriaMaestro',
+        configHistoria
+    });
 }
 
 window.guardarHistoriaMaestro = async function() {
-    const texto = document.getElementById('historiaTexto')?.value?.trim();
-    const socios = document.getElementById('cifraSocios')?.value?.trim();
-    const cepas = document.getElementById('cifraCepas')?.value?.trim();
-    const anios = document.getElementById('cifraAnios')?.value?.trim();
-    const urlsManual = (document.getElementById('historiaImagenesUrls')?.value || '')
-        .split(/\r?\n/)
-        .map((item) => item.trim())
-        .filter(Boolean);
-    const archivos = typeof obtenerArchivosAcumulados === 'function'
-        ? obtenerArchivosAcumulados('historiaImagenesFiles')
-        : document.getElementById('historiaImagenesFiles')?.files;
-    const mensajeDiv = document.getElementById('historiaMensaje');
-
-    if (!texto) {
-        if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#e0b8a0;">El texto principal no puede estar vacio.</p>';
-        return;
-    }
-
     try {
-        validarMaximoImagenes(urlsManual, archivos, 'historia');
-        let imagenesHistoria = [...urlsManual];
-        if (archivos?.length) {
-            const subidas = await subirMultiplesImagenes('noticias', archivos, 'historia');
-            imagenesHistoria = [...imagenesHistoria, ...subidas];
-        }
-
-        const updates = [
-            { clave: 'historia_texto', valor: texto },
-            { clave: 'cifra_socios', valor: socios || '0' },
-            { clave: 'cifra_cepas', valor: cepas || '0' },
-            { clave: 'cifra_anios', valor: anios || '0' },
-            { clave: 'historia_galeria', valor: JSON.stringify(imagenesHistoria) }
-        ];
-        for (const item of updates) {
-            const { error } = await supabaseClient.from('configuracion_sistema').upsert(item, { onConflict: 'clave' });
-            if (error) throw error;
-        }
-        aplicarContenidoInstitucional({
-            historia_texto: texto,
-            cifra_socios: socios || '0',
-            cifra_cepas: cepas || '0',
-            cifra_anios: anios || '0',
-            historia_galeria: JSON.stringify(imagenesHistoria)
-        });
-        if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#8fb86a;">Historia actualizada correctamente.</p>';
+        await guardarHistoriaDesdeEditor('maestroHistoria');
         mostrarMensaje('Historia guardada', true);
     } catch (error) {
-        if (mensajeDiv) mensajeDiv.innerHTML = `<p style="color:#e0b8a0;">Error: ${escapeHtml(error.message)}</p>`;
         mostrarMensaje('No se pudo guardar la historia', false);
     }
 };

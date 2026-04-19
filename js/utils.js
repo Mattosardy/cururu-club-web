@@ -220,6 +220,7 @@ function aplicarContenidoInstitucional(configMap = {}) {
     const historiaGaleria = document.getElementById('historiaGaleria');
     if (historiaMedia && historiaGaleria) {
         const imagenesHistoria = normalizarListaImagenes(configMap.historia_galeria);
+        const videoHistoria = String(configMap.historia_video_url || '').trim();
         if (imagenesHistoria.length) {
             const imagenPrincipal = obtenerImagenPrincipal(imagenesHistoria, 'Sitio en construcción');
             historiaMedia.innerHTML = `
@@ -229,6 +230,13 @@ function aplicarContenidoInstitucional(configMap = {}) {
                     style="width: 100%; max-height: 300px; border-radius: 16px; object-fit: cover;"
                     onerror="this.onerror=null; this.src='${crearPlaceholderConstruccion('Sitio en construcción')}';"
                 >
+            `;
+        } else if (videoHistoria) {
+            historiaMedia.innerHTML = `
+                <video autoplay muted loop playsinline controls style="width: 100%; max-height: 300px; border-radius: 16px; object-fit: cover;">
+                    <source src="${videoHistoria}">
+                    Tu navegador no soporta videos.
+                </video>
             `;
         } else {
             historiaMedia.innerHTML = `

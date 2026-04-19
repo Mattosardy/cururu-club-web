@@ -113,6 +113,7 @@ async function cargarAdminData() {
     `;
 
     await Promise.all([
+        cargarHistoriaAdmin(),
         cargarNoticiasAdmin(),
         cargarActividadesAdmin(),
         cargarProductosAdmin(),
@@ -124,6 +125,29 @@ async function cargarAdminData() {
     ]);
     if (typeof cargarGraficosDashboard === 'function') await cargarGraficosDashboard();
 }
+
+async function cargarHistoriaAdmin() {
+    const container = document.getElementById('admin-historia');
+    if (!container || typeof renderizarEditorHistoria !== 'function' || typeof obtenerConfigHistoriaActual !== 'function') return;
+    const configHistoria = await obtenerConfigHistoriaActual();
+    renderizarEditorHistoria(container, {
+        titulo: 'Editar Nuestra Historia',
+        prefijo: 'adminHistoria',
+        botonGuardar: 'guardarHistoriaAdmin',
+        configHistoria
+    });
+}
+
+window.guardarHistoriaAdmin = async function() {
+    try {
+        if (typeof guardarHistoriaDesdeEditor === 'function') {
+            await guardarHistoriaDesdeEditor('adminHistoria');
+        }
+        mostrarMensaje('Historia guardada', true);
+    } catch (error) {
+        mostrarMensaje('No se pudo guardar la historia', false);
+    }
+};
 
 async function cargarNoticiasAdmin() {
     const container = document.getElementById('admin-noticias');
@@ -535,10 +559,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.nav-admin-btn').forEach((other) => other.classList.remove('active'));
             btn.classList.add('active');
             const section = btn.dataset.adminSection;
-            ['noticias', 'productos', 'actividades', 'solicitudes', 'socios', 'reservasAdmin', 'mensajes'].forEach((key) => {
+            ['historia', 'noticias', 'productos', 'actividades', 'solicitudes', 'socios', 'reservasAdmin', 'mensajes'].forEach((key) => {
                 const el = document.getElementById(`admin-${key}`);
                 if (el) el.style.display = key === section ? 'block' : 'none';
             });
+            if (section === 'historia' && typeof cargarHistoriaAdmin === 'function') cargarHistoriaAdmin();
         });
     });
 
