@@ -434,6 +434,8 @@
         .modal-imagen { width: 100%; max-height: min(42dvh, 400px); object-fit: cover; border-radius: 16px; margin-bottom: 20px; }
         .modal-galeria { position: relative; width: 100%; margin-bottom: 20px; }
         .modal-galeria.horizontal { display: flex; flex-direction: column; gap: 14px; }
+        .modal-galeria.producto-simple { margin-bottom: 20px; }
+        .modal-galeria-frame { position: relative; }
         .galeria-strip {
             display: flex;
             gap: 12px;
@@ -471,6 +473,35 @@
             border-color: #7ca35a;
             transform: translateY(-2px);
         }
+        .galeria-flecha {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(124, 163, 90, 0.32);
+            background: rgba(18, 24, 16, 0.62);
+            color: #f0f5eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+        .galeria-flecha:hover {
+            background: rgba(124, 163, 90, 0.92);
+            color: #0f190c;
+            border-color: rgba(124, 163, 90, 0.92);
+        }
+        .galeria-flecha:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .galeria-flecha.izquierda { left: 12px; }
+        .galeria-flecha.derecha { right: 12px; }
         .placeholder-media {
             width: 100%;
             min-height: 160px;
@@ -817,6 +848,12 @@
                 padding: 16px 16px calc(20px + env(safe-area-inset-bottom));
             }
             .modal-imagen { max-height: 32dvh; border-radius: 14px; }
+            .galeria-flecha {
+                width: 40px;
+                height: 40px;
+            }
+            .galeria-flecha.izquierda { left: 8px; }
+            .galeria-flecha.derecha { right: 8px; }
             .modal-titulo { font-size: 1.25rem; }
             .opciones-pedido { gap: 8px; }
             .opcion-pedido { flex: 1 1 calc(50% - 8px); min-width: 120px; }

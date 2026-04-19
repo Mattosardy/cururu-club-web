@@ -120,9 +120,7 @@ window.cambiarImagenGaleria = function(direccion) {
         };
         imagenPrincipal.src = appState.galeriaActual.imagenes[nuevoIndice];
     }
-    document.querySelectorAll('.galeria-dot').forEach((dot, index) => {
-        dot.style.background = index === nuevoIndice ? '#7ca35a' : 'rgba(255,255,255,0.5)';
-    });
+    actualizarControlesGaleriaProducto();
 };
 
 window.irAImagen = function(indice) {
@@ -136,9 +134,7 @@ window.irAImagen = function(indice) {
         };
         imagenPrincipal.src = appState.galeriaActual.imagenes[indice];
     }
-    document.querySelectorAll('.galeria-dot').forEach((dot, index) => {
-        dot.style.background = index === indice ? '#7ca35a' : 'rgba(255,255,255,0.5)';
-    });
+    actualizarControlesGaleriaProducto();
 };
 
 window.seleccionarImagenProducto = function(indice) {
@@ -156,10 +152,64 @@ window.seleccionarImagenProducto = function(indice) {
         principal.src = imagen;
     }
 
+    actualizarControlesGaleriaProducto();
+};
+
+function renderizarGaleriaProductoModal(imagenes, titulo) {
+    const imagenPrincipal = imagenes[0] || crearPlaceholderConstruccion('Sitio en construccion');
+    return `
+        <div class="modal-galeria horizontal producto-simple">
+            <div class="modal-galeria-frame">
+                <button type="button" class="galeria-flecha izquierda" id="galeriaPrev" onclick="cambiarImagenGaleria(-1)" aria-label="Imagen anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <img id="modalImagenGaleria" class="modal-imagen" src="${imagenPrincipal}" alt="${escapeHtml(titulo)}">
+                <button type="button" class="galeria-flecha derecha" id="galeriaNext" onclick="cambiarImagenGaleria(1)" aria-label="Imagen siguiente">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            ${imagenes.length > 1 ? `
+                <div class="galeria-strip">
+                    ${imagenes.map((imagen, index) => `
+                        <button type="button" class="galeria-thumb${index === 0 ? ' activa' : ''}" onclick="seleccionarImagenProducto(${index})" aria-label="Ver imagen ${index + 1}">
+                            <img src="${imagen}" alt="${escapeHtml(titulo)} ${index + 1}" onerror="this.onerror=null; this.src='${crearPlaceholderConstruccion('Sitio en construcción')}';">
+                        </button>
+                    `).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function actualizarControlesGaleriaProducto() {
+    const total = appState.galeriaActual?.imagenes?.length || 0;
+    const indice = appState.galeriaActual?.indice || 0;
+    const prev = document.getElementById('galeriaPrev');
+    const next = document.getElementById('galeriaNext');
+    if (prev) prev.disabled = total <= 1 || indice <= 0;
+    if (next) next.disabled = total <= 1 || indice >= total - 1;
     document.querySelectorAll('#modalMedia .galeria-thumb').forEach((thumb, thumbIndex) => {
         thumb.classList.toggle('activa', thumbIndex === indice);
     });
-};
+}
+
+function habilitarSwipeGaleriaProducto() {
+    const imagenPrincipal = document.getElementById('modalImagenGaleria');
+    if (!imagenPrincipal) return;
+
+    let touchInicioX = 0;
+
+    imagenPrincipal.addEventListener('touchstart', (event) => {
+        touchInicioX = event.changedTouches[0]?.clientX || 0;
+    }, { passive: true });
+
+    imagenPrincipal.addEventListener('touchend', (event) => {
+        const touchFinX = event.changedTouches[0]?.clientX || 0;
+        const delta = touchFinX - touchInicioX;
+        if (Math.abs(delta) < 35) return;
+        cambiarImagenGaleria(delta < 0 ? 1 : -1);
+    }, { passive: true });
+}
 
 async function abrirModal(producto) {
     appState.productoModalActual = producto;
@@ -183,11 +233,7 @@ async function abrirModal(producto) {
     appState.galeriaActual = { imagenes: imagenesArray, indice: 0, productoId: producto.id };
 
     const modalMedia = document.getElementById('modalMedia');
-    modalMedia.innerHTML = construirHTMLGaleriaHorizontal(imagenesArray, {
-        imagenPrincipalId: 'modalImagenGaleria',
-        onSelect: 'seleccionarImagenProducto',
-        titulo: producto.nombre || 'Variedad'
-    });
+    modalMedia.innerHTML = renderizarGaleriaProductoModal(imagenesArray, producto.nombre || 'Variedad');
     const imagenPrincipal = document.getElementById('modalImagenGaleria');
     if (imagenPrincipal) {
         imagenPrincipal.onerror = function onErrorImagen() {
@@ -195,6 +241,9 @@ async function abrirModal(producto) {
             this.src = obtenerImagenFallback(producto) || crearPlaceholderConstruccion('Sitio en construcción');
         };
     }
+
+    actualizarControlesGaleriaProducto();
+    habilitarSwipeGaleriaProducto();
 
     document.getElementById('modalTitulo').textContent = producto.nombre;
     document.getElementById('modalCepa').textContent = producto.cepa || 'Cepa especial';
