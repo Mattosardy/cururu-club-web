@@ -22,14 +22,12 @@ function actualizarBotonesSesion(autenticado) {
     const productosNav = document.querySelector('.header-nav [data-section="productos"]');
     const dockProductos = document.getElementById('dockBtnProductos');
     const desktopLogout = document.getElementById('btnLogout');
-    const mobileLogout = document.getElementById('mobileBtnLogout');
 
     if (desktopLogin) desktopLogin.style.display = autenticado ? 'none' : 'inline-block';
     if (dockLogin) dockLogin.style.display = autenticado ? 'none' : 'flex';
     if (productosNav) productosNav.style.display = autenticado ? '' : 'none';
     if (dockProductos) dockProductos.style.display = autenticado ? 'flex' : 'none';
     if (desktopLogout) desktopLogout.style.display = autenticado ? 'inline-block' : 'none';
-    if (mobileLogout) mobileLogout.style.display = autenticado ? 'flex' : 'none';
 }
 
 async function actualizarUIporRol() {

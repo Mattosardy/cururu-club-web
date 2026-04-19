@@ -129,11 +129,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('btnLogin')?.addEventListener('click', iniciarSesion);
     document.getElementById('btnLogout')?.addEventListener('click', cerrarSesionHandler);
-    document.getElementById('mobileBtnLogout')?.addEventListener('click', cerrarSesionHandler);
     document.getElementById('dockBtnLogin')?.addEventListener('click', iniciarSesion);
 
     document.querySelectorAll('.nav-btn').forEach((btn) => {
-        if (btn.id === 'mobileBtnLogout') return;
         btn.addEventListener('click', async () => {
             await mostrarSeccion(btn.dataset.section);
         });
