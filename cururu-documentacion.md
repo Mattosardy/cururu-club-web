@@ -177,11 +177,16 @@ CREATE TABLE productos (
   cepa TEXT,
   thc_porcentaje DECIMAL(5,2),
   cbd_porcentaje DECIMAL(5,2),
+  tipo_cultivo TEXT NOT NULL DEFAULT 'indoor' CHECK (tipo_cultivo IN ('indoor', 'exterior')),
   fecha_cosecha DATE,
   lote_id UUID REFERENCES lotes_cosecha(id),
   disponible BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+ALTER TABLE productos
+ADD COLUMN IF NOT EXISTS tipo_cultivo TEXT NOT NULL DEFAULT 'indoor'
+CHECK (tipo_cultivo IN ('indoor', 'exterior'));
 
 -- 7. ACTIVIDADES
 CREATE TABLE actividades (

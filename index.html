@@ -32,8 +32,11 @@
         body {
             font-family: 'Open Sans', sans-serif;
             min-height: 100vh;
-            background: url('assets/images/fondo-home.png') no-repeat fixed center center;
+            background-image: url('assets/images/fondo-home.png');
+            background-repeat: no-repeat;
+            background-position: center center;
             background-size: cover;
+            background-attachment: scroll;
             position: relative;
         }
         body::before {
@@ -299,7 +302,31 @@
             text-align: left;
             white-space: pre-line;
         }
-        .productos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .productos-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+        .productos-columna {
+            min-width: 0;
+        }
+        .productos-columna-titulo {
+            margin: 0 0 14px;
+            color: var(--accent-strong);
+            font-size: 1.15rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            text-align: center;
+        }
+        .productos-lista {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .productos-vacio {
+            background: rgba(8, 15, 6, 0.45);
+            border: 1px dashed rgba(124, 163, 90, 0.35);
+            border-radius: 14px;
+            color: #c8d8b5;
+            padding: 18px;
+            text-align: center;
+        }
         .producto-card {
             background: var(--surface-soft);
             border-radius: 16px;
@@ -672,7 +699,6 @@
             padding: 25px; border: 2px solid #7ca35a;
         }
         @media (max-width: 768px) {
-            body { background-attachment: scroll; }
             .container {
                 padding:
                     calc(18px + env(safe-area-inset-top))
@@ -889,7 +915,8 @@
                 padding: 0;
                 gap: 8px;
             }
-            .productos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .productos-grid { grid-template-columns: 1fr; gap: 18px; }
+            .productos-lista { gap: 12px; }
             .producto-miniatura { height: 132px; }
             .producto-detalle { padding: 11px 10px 10px; }
             .producto-nombre { font-size: 0.95rem !important; line-height: 1.2; }
@@ -1190,6 +1217,7 @@
                 <div class="form-group"><label>Cepa</label><input type="text" id="editCepa"></div>
                 <div class="form-group"><label>THC %</label><input type="number" step="0.1" id="editThc"></div>
                 <div class="form-group"><label>CBD %</label><input type="number" step="0.1" id="editCbd"></div>
+                <div class="form-group"><label>Tipo</label><select id="editTipoCultivo"><option value="indoor">Indoor</option><option value="exterior">Exterior</option></select></div>
                 <div class="form-group"><label>Precio 10g ($)</label><input type="number" step="0.01" id="editPrecio" value="1600"></div>
                 <div class="form-group full-width"><label>Descripción</label><textarea id="editDescripcion" rows="3"></textarea></div>
                 <div class="form-group full-width"><label>URL Imagen principal</label><input type="text" id="editImagenUrl" placeholder="https://ejemplo.com/imagen.jpg"></div>

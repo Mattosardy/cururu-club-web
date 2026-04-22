@@ -75,6 +75,37 @@ function ordenarProductosParaCatalogo(productos) {
     });
 }
 
+function normalizarTipoCultivo(tipoCultivo) {
+    return String(tipoCultivo || '').trim().toLowerCase() === 'exterior' ? 'exterior' : 'indoor';
+}
+
+function obtenerTituloTipoCultivo(tipoCultivo) {
+    return tipoCultivo === 'exterior' ? 'Exterior' : 'Indoor';
+}
+
+function renderizarTarjetaProducto(producto) {
+    const imagenes = normalizarListaImagenes(producto.imagen_url);
+    const imagenPrincipal = imagenes[0] || obtenerImagenFallback(producto) || crearPlaceholderConstruccion('Sitio en construcciÃ³n');
+    const disponible = producto.disponible !== false;
+    const indicaSativa = producto.indica_sativa || '50% Indica - 50% Sativa';
+
+    return `
+        <div class="producto-card" data-producto='${JSON.stringify(producto).replace(/'/g, '&#39;')}'>
+            <div class="producto-miniatura">
+                <img src="${imagenPrincipal}" alt="${escapeHtml(producto.nombre)}" style="width:100%;height:160px;object-fit:cover;" onerror="this.onerror=null; this.src='${obtenerImagenFallback(producto) || crearPlaceholderConstruccion('Sitio en construcciÃ³n')}';">
+            </div>
+            ${renderizarEstrellas(producto.promedio, producto.totalCalificaciones)}
+            <div class="producto-detalle">
+                <h3 class="producto-nombre">${escapeHtml(producto.nombre)}</h3>
+                <div style="color:#111111;font-size:0.9rem;margin-bottom:10px;">${escapeHtml(indicaSativa)}</div>
+                <button class="btn-mas-info" onclick="event.stopPropagation();mostrarMasInfo('${producto.id}')" style="background:#496535;border:1px solid #496535;color:#f4f8ef;padding:8px 16px;border-radius:20px;cursor:pointer;width:100%;margin-bottom:10px;"><i class="fas fa-plus-circle"></i> InformaciÃ³n</button>
+                <button class="btn-reservar-producto" onclick="event.stopPropagation();abrirModalDesdeBoton('${producto.id}')" style="background:#496535;border:none;color:#f4f8ef;padding:10px;border-radius:25px;cursor:pointer;font-weight:bold;width:100%;" ${!disponible ? 'disabled' : ''}><i class="fas fa-calendar-check"></i> Reservar</button>
+                ${!disponible ? '<div style="margin-top:8px;color:#9B6A6C;">No disponible</div>' : ''}
+            </div>
+        </div>
+    `;
+}
+
 async function cargarNoticias() {
     const container = document.getElementById('noticias-container');
     if (!container) return;
@@ -155,6 +186,28 @@ async function cargarProductosPublicos() {
     }));
 
     const productosOrdenados = ordenarProductosParaCatalogo(productosConCalificaciones);
+    const grupos = { indoor: [], exterior: [] };
+
+    productosOrdenados.forEach((producto) => {
+        grupos[normalizarTipoCultivo(producto.tipo_cultivo)].push(producto);
+    });
+
+    container.innerHTML = ['indoor', 'exterior'].map((tipoCultivo) => `
+        <div class="productos-columna">
+            <h3 class="productos-columna-titulo">${obtenerTituloTipoCultivo(tipoCultivo)}</h3>
+            <div class="productos-lista">
+                ${grupos[tipoCultivo].length ? grupos[tipoCultivo].map((producto) => renderizarTarjetaProducto(producto)).join('') : '<div class="productos-vacio">No hay variedades en esta columna.</div>'}
+            </div>
+        </div>
+    `).join('');
+
+    document.querySelectorAll('.producto-card').forEach((card) => {
+        card.addEventListener('click', (event) => {
+            if (event.target.closest('button')) return;
+            abrirModal(JSON.parse(card.dataset.producto));
+        });
+    });
+    return;
 
     container.innerHTML = productosOrdenados.map((producto) => {
         const imagenes = normalizarListaImagenes(producto.imagen_url);
