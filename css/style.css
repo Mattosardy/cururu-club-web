@@ -2,8 +2,11 @@
 body {
     font-family: 'Open Sans', sans-serif;
     min-height: 100vh;
-    background: url('../assets/images/fondo-home.png') no-repeat fixed center center;
+    background-image: url('../assets/images/fondo-home.png');
+    background-repeat: no-repeat;
+    background-position: center center;
     background-size: cover;
+    background-attachment: scroll;
     position: relative;
 }
 body::before {
@@ -53,7 +56,7 @@ body::before {
     flex-wrap: wrap;
 }
 .user-info span {
-    color: #8fb86a;
+    color: #000000;
     font-weight: bold;
 }
 .btn-inicio,
@@ -135,20 +138,29 @@ body::before {
 }
 .historia-texto {
     flex: 2;
-    color: #e0ecd0;
+    color: #2a3e2c;
     line-height: 1.6;
     width: 100%;
     text-align: center;
 }
-.historia-texto p {
+.historia-texto-contenido {
     margin-bottom: 15px;
-    color: #e0ecd0;
+    color: #2a3e2c;
     max-width: 75ch;
     margin-left: auto;
     margin-right: auto;
-    text-align: center;
+    text-align: left;
+    white-space: pre-line;
+    line-height: 1.8;
 }
-.historia-texto strong { color: #8fb86a; }
+.historia-texto-contenido[hidden] {
+    display: none !important;
+}
+.historia-toggle {
+    text-align: center;
+    margin: 18px 0 6px;
+}
+.historia-texto strong { color: #000000; }
 .historia-imagen {
     flex: 1;
     text-align: center;
@@ -169,12 +181,12 @@ body::before {
     display: block;
     font-size: 1.8rem;
     font-weight: bold;
-    color: #8fb86a;
+    color: #000000;
     font-family: 'Poppins', sans-serif;
 }
 .cifra-texto {
     font-size: 0.8rem;
-    color: #c8d8b5;
+    color: #465b48;
 }
 .noticias-grid {
     display: grid;
@@ -190,7 +202,7 @@ body::before {
 .noticia-titulo {
     font-family: 'Poppins', sans-serif;
     font-size: 1.2rem;
-    color: #e0ecd0;
+    color: #1f3121;
     margin-bottom: 10px;
 }
 .noticia-fecha {
@@ -199,7 +211,7 @@ body::before {
     margin-bottom: 12px;
 }
 .noticia-contenido {
-    color: #b8c8a5;
+    color: #465b48;
     line-height: 1.5;
     font-size: 0.9rem;
 }
@@ -248,7 +260,7 @@ body::before {
 .producto-nombre {
     font-family: 'Poppins', sans-serif;
     font-size: 1.1rem !important;
-    color: #e0ecd0;
+    color: #1f3121;
 }
 .producto-cepa {
     font-size: 0.8rem;
@@ -257,7 +269,7 @@ body::before {
 }
 .producto-descripcion {
     font-size: 0.85rem;
-    color: #a0b890;
+    color: #465b48;
     margin-top: 10px;
 }
 .thc-badge {
@@ -272,7 +284,7 @@ body::before {
 .btn-mas-info:hover {
     background: rgba(124, 163, 90, 0.2) !important;
     border-color: #8fb86a !important;
-    color: #8fb86a !important;
+    color: #000000 !important;
 }
 .btn-reservar-producto:hover {
     background: #8fb86a !important;
@@ -482,7 +494,7 @@ body::before {
 }
 .estado-confirmado {
     background: rgba(100, 140, 75, 0.3);
-    color: #8fb86a;
+    color: #000000;
 }
 .opciones-gramos {
     display: flex;
@@ -531,7 +543,7 @@ body::before {
 .card-number {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #8fb86a;
+    color: #000000;
 }
 .card-label {
     color: #c8d8b5;
@@ -605,7 +617,7 @@ body::before {
     text-align: left;
 }
 .modal-pedido-titulo {
-    color: #8fb86a;
+    color: #000000;
     font-family: 'Poppins', sans-serif;
     font-size: 1rem;
     margin-bottom: 12px;
@@ -758,7 +770,7 @@ body::before {
 }
 .mensaje-destino {
     font-size: 0.75rem;
-    color: #8fb86a;
+    color: #000000;
     margin-bottom: 5px;
 }
 .mensaje-texto {
@@ -910,13 +922,13 @@ body::before {
 }
 /* Estilos para el botón Leer más */
 #btnLeerMasHistoria {
-    background: transparent;
-    border: 2px solid #7ca35a;
-    color: #7ca35a;
+    background: linear-gradient(135deg, rgba(124, 163, 90, 0.2) 0%, rgba(124, 163, 90, 0.1) 100%);
+    border: 1px solid rgba(124, 163, 90, 0.65);
+    color: #35502d;
     transition: all 0.3s ease;
 }
 #btnLeerMasHistoria:hover {
-    background: #7ca35a;
+    background: linear-gradient(135deg, rgba(124, 163, 90, 0.95) 0%, rgba(111, 153, 82, 0.95) 100%);
     color: #0f190c;
 }
 /* Animación para el texto completo */
@@ -929,26 +941,32 @@ body::before {
 }
 /* Botón Leer más */
 .btn-leer-mas {
-    background: transparent;
-    border: 2px solid #7ca35a;
-    color: #7ca35a;
-    padding: 12px 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(124, 163, 90, 0.2) 0%, rgba(124, 163, 90, 0.1) 100%);
+    border: 1px solid rgba(124, 163, 90, 0.65);
+    color: #35502d;
+    padding: 13px 30px;
     border-radius: 50px;
     cursor: pointer;
-    font-size: 1.05rem;
-    font-weight: 600;
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 22px rgba(53, 80, 45, 0.12);
+    backdrop-filter: blur(8px);
 }
 .btn-leer-mas:hover {
-    background: #7ca35a;
+    background: linear-gradient(135deg, rgba(124, 163, 90, 0.95) 0%, rgba(111, 153, 82, 0.95) 100%);
     color: #0f190c;
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(124, 163, 90, 0.3);
+    box-shadow: 0 14px 28px rgba(53, 80, 45, 0.22);
 }
 .btn-leer-mas i {
-    margin-right: 8px;
     transition: transform 0.3s ease;
+    font-size: 0.9rem;
 }
 .btn-leer-mas.activo i {
     transform: rotate(180deg);
@@ -960,13 +978,15 @@ body::before {
     width: 100%;
     text-align: center;
 }
-.historia-texto p {
+.historia-texto-contenido {
     margin-bottom: 15px;
     color: #e0ecd0;
     max-width: 75ch;
     margin-left: auto;
     margin-right: auto;
-    text-align: center;
+    text-align: left;
+    white-space: pre-line;
+    line-height: 1.8;
 }
 #historia-adicional p {
     max-width: 75ch;

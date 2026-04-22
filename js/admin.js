@@ -42,7 +42,7 @@ function obtenerArchivosAcumulados(inputId) {
 function validarMaximoImagenes(urls = [], files = null, contexto = 'contenido') {
     const total = (urls?.length || 0) + (files?.length || 0);
     if (total > MAX_IMAGENES_POR_CONTENIDO) {
-        throw new Error(`Solo se permiten hasta ${MAX_IMAGENES_POR_CONTENIDO} imagenes por ${contexto}.`);
+        throw new Error(`Solo se permiten hasta ${MAX_IMAGENES_POR_CONTENIDO} imágenes por ${contexto}.`);
     }
 }
 
@@ -62,7 +62,7 @@ function configurarInputImagenesConLimite(inputId, previewId, contexto) {
         const acumulados = Array.from(mapa.values());
 
         if (acumulados.length > MAX_IMAGENES_POR_CONTENIDO) {
-            mostrarMensaje(`Solo podes seleccionar hasta ${MAX_IMAGENES_POR_CONTENIDO} imagenes para ${contexto}.`, false);
+            mostrarMensaje(`Solo podés seleccionar hasta ${MAX_IMAGENES_POR_CONTENIDO} imágenes para ${contexto}.`, false);
             sincronizarInputConArchivos(event.target, actuales);
             return;
         }
@@ -83,7 +83,7 @@ async function subirMultiplesImagenes(bucket, files, prefijo) {
             const mensaje = String(error.message || '').toLowerCase();
             const bucketFaltante = error.statusCode === '400' || error.statusCode === 400 || mensaje.includes('bucket') || mensaje.includes('not found');
             if (bucketFaltante) {
-                throw new Error(`No existe o no esta listo el bucket "${bucket}" en Supabase Storage.`);
+                throw new Error(`No existe o no está listo el bucket "${bucket}" en Supabase Storage.`);
             }
             throw error;
         }
@@ -91,6 +91,94 @@ async function subirMultiplesImagenes(bucket, files, prefijo) {
     }
     return imagenes;
 }
+
+function obtenerReferenciaStorageDesdeUrl(url) {
+    if (!url) return null;
+    try {
+        const parsed = new URL(url);
+        const base = new URL(SUPABASE_URL);
+        if (parsed.origin !== base.origin) return null;
+
+        const marker = '/storage/v1/object/public/';
+        const index = parsed.pathname.indexOf(marker);
+        if (index === -1) return null;
+
+        const relativePath = parsed.pathname.slice(index + marker.length);
+        const segments = relativePath.split('/').filter(Boolean);
+        if (segments.length < 2) return null;
+
+        const bucket = segments.shift();
+        const path = decodeURIComponent(segments.join('/'));
+        return bucket && path ? { bucket, path } : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+async function eliminarArchivoStoragePorUrl(url) {
+    const referencia = obtenerReferenciaStorageDesdeUrl(url);
+    if (!referencia) return { success: false, skipped: true };
+
+    const { error } = await supabaseClient.storage.from(referencia.bucket).remove([referencia.path]);
+    if (error) {
+        console.warn(`No se pudo eliminar ${referencia.path} de ${referencia.bucket}`, error);
+        return { success: false, error };
+    }
+    return { success: true };
+}
+
+async function eliminarArchivosStoragePorUrls(urls = []) {
+    const unicos = Array.from(new Set((urls || []).filter(Boolean)));
+    const resultados = [];
+    for (const url of unicos) {
+        resultados.push(await eliminarArchivoStoragePorUrl(url));
+    }
+    return resultados;
+}
+
+window.obtenerReferenciaStorageDesdeUrl = obtenerReferenciaStorageDesdeUrl;
+window.eliminarArchivoStoragePorUrl = eliminarArchivoStoragePorUrl;
+window.eliminarArchivosStoragePorUrls = eliminarArchivosStoragePorUrls;
+
+let cacheProductosTieneTipoCultivo = null;
+
+function errorEsColumnaTipoCultivoFaltante(error) {
+    const mensaje = String(error?.message || '').toLowerCase();
+    const codigo = String(error?.code || '').toUpperCase();
+    return codigo === 'PGRST204' || (mensaje.includes('tipo_cultivo') && (mensaje.includes('schema cache') || mensaje.includes('column')));
+}
+
+async function productosTieneTipoCultivo() {
+    if (cacheProductosTieneTipoCultivo !== null) return cacheProductosTieneTipoCultivo;
+    const { error } = await supabaseClient.from('productos').select('tipo_cultivo').limit(1);
+    cacheProductosTieneTipoCultivo = !error || !errorEsColumnaTipoCultivoFaltante(error);
+    return cacheProductosTieneTipoCultivo;
+}
+
+function marcarProductosSinTipoCultivo() {
+    cacheProductosTieneTipoCultivo = false;
+}
+
+async function insertarProductoConCompatibilidad(payload) {
+    const incluirTipoCultivo = await productosTieneTipoCultivo();
+    const payloadFinal = incluirTipoCultivo ? payload : (() => {
+        const { tipo_cultivo, ...payloadSinTipo } = payload;
+        return payloadSinTipo;
+    })();
+
+    let query = supabaseClient.from('productos').insert([payloadFinal]).select().single();
+    let resultado = await query;
+    if (!resultado.error || !errorEsColumnaTipoCultivoFaltante(resultado.error)) return resultado;
+
+    marcarProductosSinTipoCultivo();
+    const { tipo_cultivo, ...payloadSinTipo } = payload;
+    return supabaseClient.from('productos').insert([payloadSinTipo]).select().single();
+}
+
+window.errorEsColumnaTipoCultivoFaltante = errorEsColumnaTipoCultivoFaltante;
+window.insertarProductoConCompatibilidad = insertarProductoConCompatibilidad;
+window.productosTieneTipoCultivo = productosTieneTipoCultivo;
+window.marcarProductosSinTipoCultivo = marcarProductosSinTipoCultivo;
 
 async function cargarAdminData() {
     const cards = document.getElementById('adminCards');
@@ -158,7 +246,7 @@ async function cargarNoticiasAdmin() {
         <form id="formNoticiaAdmin">
             <h3>Nueva noticia</h3>
             <div class="form-grid">
-                <div class="form-group full-width"><input type="text" id="noticiaTituloAdmin" placeholder="Titulo" required></div>
+                <div class="form-group full-width"><input type="text" id="noticiaTituloAdmin" placeholder="Título" required></div>
                 <div class="form-group full-width"><textarea id="noticiaContenidoAdmin" rows="4" placeholder="Contenido" required></textarea></div>
                 <div class="form-group"><input type="text" id="noticiaAutorAdmin" placeholder="Autor"></div>
             </div>
@@ -172,7 +260,7 @@ async function cargarNoticiasAdmin() {
         <hr>
         ${noticias.length ? `
             <table class="tabla-datos">
-                <thead><tr><th>Fecha</th><th>Titulo</th><th>Imagen</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
                 <tbody>${noticias.map((noticia) => `
                     <tr>
                         <td>${new Date(noticia.fecha_publicacion).toLocaleDateString('es')}</td>
@@ -182,7 +270,7 @@ async function cargarNoticiasAdmin() {
                     </tr>
                 `).join('')}</tbody>
             </table>
-        ` : '<div class="loading">No hay noticias todavia.</div>'}
+        ` : '<div class="loading">No hay noticias todavía.</div>'}
     `;
 
     configurarInputImagenesConLimite('noticiaImagenAdmin', 'noticiaPreview', 'noticias');
@@ -195,7 +283,7 @@ async function cargarNoticiasAdmin() {
             try {
                 imagenes = await subirMultiplesImagenes('noticias', imagenFiles, 'noticia');
             } catch (error) {
-                mostrarMensaje(`Las imagenes no se pudieron subir: ${error.message}`, false);
+                mostrarMensaje(`Las imágenes no se pudieron subir: ${error.message}`, false);
                 return;
             }
         }
@@ -245,18 +333,18 @@ async function cargarActividadesAdmin() {
                         <option value="regalo">Regalo</option>
                     </select>
                 </div>
-                <div class="form-group full-width"><input type="text" id="actividadTituloAdmin" placeholder="Titulo" required></div>
+                <div class="form-group full-width"><input type="text" id="actividadTituloAdmin" placeholder="Título" required></div>
                 <div class="form-group"><input type="date" id="actividadFechaAdmin" required></div>
                 <div class="form-group"><input type="time" id="actividadHoraAdmin"></div>
-                <div class="form-group"><input type="text" id="actividadUbicacionAdmin" placeholder="Ubicacion"></div>
-                <div class="form-group full-width"><textarea id="actividadDescripcionAdmin" rows="3" placeholder="Descripcion"></textarea></div>
+                <div class="form-group"><input type="text" id="actividadUbicacionAdmin" placeholder="Ubicación"></div>
+                <div class="form-group full-width"><textarea id="actividadDescripcionAdmin" rows="3" placeholder="Descripción"></textarea></div>
             </div>
             <button type="submit" class="btn-submit">Crear</button>
         </form>
         <hr>
         ${actividades.length ? `
             <table class="tabla-datos">
-                <thead><tr><th>Fecha</th><th>Tipo</th><th>Titulo</th><th></th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Tipo</th><th>Título</th><th></th></tr></thead>
                 <tbody>${actividades.map((actividad) => `
                     <tr>
                         <td>${new Date(actividad.fecha).toLocaleDateString('es')}</td>
@@ -266,7 +354,7 @@ async function cargarActividadesAdmin() {
                     </tr>
                 `).join('')}</tbody>
             </table>
-        ` : '<div class="loading">No hay actividades todavia.</div>'}
+        ` : '<div class="loading">No hay actividades todavía.</div>'}
     `;
 
     document.getElementById('formActividadAdmin')?.addEventListener('submit', async (event) => {
@@ -320,8 +408,8 @@ async function cargarProductosAdmin() {
                     </select>
                 </div>
                 <div class="form-group"><input type="number" step="0.01" id="productoPrecioAdmin" placeholder="Precio 10g" value="1600"></div>
-                <div class="form-group full-width"><textarea id="productoDescripcionAdmin" rows="3" placeholder="Descripcion"></textarea></div>
-                <div class="form-group full-width"><textarea id="productoImagenAdmin" rows="3" placeholder="URLs de imagen opcionales, una por linea"></textarea></div>
+                <div class="form-group full-width"><textarea id="productoDescripcionAdmin" rows="3" placeholder="Descripción"></textarea></div>
+                <div class="form-group full-width"><textarea id="productoImagenAdmin" rows="3" placeholder="URLs de imagen opcionales, una por línea"></textarea></div>
                 <div class="form-group full-width">
                     <label style="color: #c8d8b5; margin-bottom: 8px;"><i class="fas fa-image"></i> O subir varias imágenes</label>
                     <input type="file" id="productoImagenFileAdmin" accept="image/*" multiple style="background: rgba(8,15,6,0.8); border: 1px solid rgba(100,140,75,0.4); border-radius: 12px; padding: 10px; color: #e0ecd0; width: 100%;">
@@ -344,7 +432,7 @@ async function cargarProductosAdmin() {
                     </tr>
                 `).join('')}</tbody>
             </table>
-        ` : '<div class="loading">No hay productos todavia.</div>'}
+        ` : '<div class="loading">No hay productos todavía.</div>'}
     `;
 
     configurarInputImagenesConLimite('productoImagenFileAdmin', 'productoPreview', 'productos');
@@ -363,12 +451,12 @@ async function cargarProductosAdmin() {
                 const subidas = await subirMultiplesImagenes('productos', imagenFiles, 'producto');
                 imagenes = [...imagenes, ...subidas];
             } catch (error) {
-                mostrarMensaje(`Las imagenes no se pudieron subir: ${error.message}`, false);
+                mostrarMensaje(`Las imágenes no se pudieron subir: ${error.message}`, false);
                 return;
             }
         }
 
-        const { data: productoCreado, error } = await supabaseClient.from('productos').insert([{
+        const payloadProducto = {
             nombre: document.getElementById('productoNombreAdmin').value,
             cepa: document.getElementById('productoCepaAdmin').value,
             thc_porcentaje: parseFloat(document.getElementById('productoThcAdmin').value) || null,
@@ -378,7 +466,8 @@ async function cargarProductosAdmin() {
             descripcion: document.getElementById('productoDescripcionAdmin').value,
             imagen_url: imagenes[0] || null,
             disponible: true
-        }]).select().single();
+        };
+        const { data: productoCreado, error } = await insertarProductoConCompatibilidad(payloadProducto);
         if (error) {
             mostrarMensaje(`No se pudo crear el producto: ${error.message}`, false);
             return;
@@ -388,7 +477,7 @@ async function cargarProductosAdmin() {
             for (const [index, imagenUrl] of imagenes.entries()) {
                 const resultado = await agregarImagenProducto(productoCreado.id, imagenUrl, index);
                 if (resultado.error) {
-                    mostrarMensaje(`El producto se creo, pero una imagen no se pudo guardar: ${resultado.error.message}`, false);
+                    mostrarMensaje(`El producto se creó, pero una imagen no se pudo guardar: ${resultado.error.message}`, false);
                     break;
                 }
             }

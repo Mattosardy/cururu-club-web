@@ -9,7 +9,7 @@ async function subirArchivoPublico(bucket, file, prefijo) {
         const mensaje = String(error.message || '').toLowerCase();
         const bucketFaltante = error.statusCode === '400' || error.statusCode === 400 || mensaje.includes('bucket') || mensaje.includes('not found');
         if (bucketFaltante) {
-            throw new Error(`No existe o no esta listo el bucket "${bucket}" en Supabase Storage.`);
+            throw new Error(`No existe o no está listo el bucket "${bucket}" en Supabase Storage.`);
         }
         throw error;
     }
@@ -18,7 +18,24 @@ async function subirArchivoPublico(bucket, file, prefijo) {
 
 function obtenerConfigHistoriaPredeterminada() {
     return {
-        texto: 'nacio como un espacio de encuentro para la comunidad cannabica en Uruguay.',
+        texto: `Cururú Club Cannábico
+
+Flores de alta calidad y una experiencia cuidada para quienes buscan elegir y consumir de forma consciente.
+
+Ofrecemos más de 6 variedades durante todo el año, cultivadas con estrategias biominerales en exterior e invernáculo con luz asistida, logrando consistencia en cada cosecha.
+
+¿Qué ofrecemos?
+- Calidad superior con variedades a elección
+- Mismo estándar todo el año
+- Precios según tipo de cultivo (exterior o invernáculo)
+
+Condiciones:
+- Mínimo: 20 g por variedad / mes
+- Máximo: 40 g por variedad / mes (combinables entre variedades)
+
+Si te interesa, coordinamos una reunión y te contamos cómo trabajamos.
+
+Cururú Club Cannábico - calidad y transparencia.`,
         socios: '38',
         cepas: '120',
         anios: '8',
@@ -65,7 +82,7 @@ function renderizarEditorHistoria(container, opciones = {}) {
                 <input type="number" id="${prefijo}Cepas" value="${escapeHtml(configHistoria.cepas)}">
             </div>
             <div class="form-group">
-                <label>Anios de experiencia</label>
+                <label>Años de experiencia</label>
                 <input type="number" id="${prefijo}Anios" value="${escapeHtml(configHistoria.anios)}">
             </div>
             <div class="form-group full-width">
@@ -75,14 +92,14 @@ function renderizarEditorHistoria(container, opciones = {}) {
             <div class="form-group full-width">
                 <label>Subir video</label>
                 <input type="file" id="${prefijo}VideoFile" accept="video/*" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">
-                <small style="color:#5f7f45; display:block; margin-top:8px;">Si cargás imagenes, la web muestra primero las fotos. Si no hay imagenes, usa este video.</small>
+                <small style="color:#5f7f45; display:block; margin-top:8px;">Si cargás imágenes, la web muestra primero las fotos. Si no hay imágenes, usa este video.</small>
             </div>
             <div class="form-group full-width">
-                <label>Imagenes de historia por URL (una por linea)</label>
+                <label>Imágenes de historia por URL (una por línea)</label>
                 <textarea id="${prefijo}ImagenesUrls" rows="4" style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">${escapeHtml(configHistoria.imagenes.join('\n'))}</textarea>
             </div>
             <div class="form-group full-width">
-                <label>Subir varias imagenes</label>
+                <label>Subir varias imágenes</label>
                 <input type="file" id="${prefijo}ImagenesFiles" accept="image/*" multiple style="background:rgba(8,15,6,0.8);border-radius:12px;padding:12px;color:#e0ecd0;">
                 <div id="${prefijo}ImagenesPreview" style="margin-top: 12px;"></div>
             </div>
@@ -115,10 +132,11 @@ async function guardarHistoriaDesdeEditor(prefijo = 'historia') {
     const mensajeDiv = document.getElementById(`${prefijo}Mensaje`);
 
     if (!texto) {
-        if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#e0b8a0;">El texto principal no puede estar vacio.</p>';
+        if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#e0b8a0;">El texto principal no puede estar vacío.</p>';
         return false;
     }
 
+    const configActual = await obtenerConfigHistoriaActual();
     validarMaximoImagenes(urlsManual, archivos, 'historia');
 
     let imagenesHistoria = [...urlsManual];
@@ -130,6 +148,19 @@ async function guardarHistoriaDesdeEditor(prefijo = 'historia') {
     let videoHistoria = videoUrlManual;
     if (videoFile) {
         videoHistoria = await subirArchivoPublico('noticias', videoFile, 'historia_video');
+    }
+
+    const imagenesEliminadas = (configActual.imagenes || []).filter((url) => !imagenesHistoria.includes(url));
+    if (imagenesEliminadas.length && typeof eliminarArchivosStoragePorUrls === 'function') {
+        await eliminarArchivosStoragePorUrls(imagenesEliminadas);
+    }
+
+    if (
+        configActual.videoUrl &&
+        configActual.videoUrl !== videoHistoria &&
+        typeof eliminarArchivoStoragePorUrl === 'function'
+    ) {
+        await eliminarArchivoStoragePorUrl(configActual.videoUrl);
     }
 
     const updates = [
@@ -153,7 +184,7 @@ async function guardarHistoriaDesdeEditor(prefijo = 'historia') {
         historia_video_url: videoHistoria || '',
         historia_galeria: JSON.stringify(imagenesHistoria)
     });
-    if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#8fb86a;">Historia actualizada correctamente.</p>';
+    if (mensajeDiv) mensajeDiv.innerHTML = '<p style="color:#000000;">Historia actualizada correctamente.</p>';
     return true;
 }
 
@@ -249,13 +280,13 @@ window.guardarConfigMaestro = async function() {
     for (const item of updates) {
         const { error } = await supabaseClient.from('configuracion_sistema').upsert(item, { onConflict: 'clave' });
         if (error) {
-            mostrarMensaje(`No se pudo guardar la configuracion: ${error.message}`, false);
+            mostrarMensaje(`No se pudo guardar la configuración: ${error.message}`, false);
             return;
         }
     }
     configSistema.horasLimitePrimer = parseInt(h1, 10);
     configSistema.horasLimiteUltimo = parseInt(h2, 10);
-    mostrarMensaje('Configuracion guardada', true);
+    mostrarMensaje('Configuración guardada', true);
 };
 
 document.addEventListener('DOMContentLoaded', () => {

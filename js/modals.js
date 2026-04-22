@@ -45,7 +45,7 @@ function actualizarEstadoPedidoModal() {
     }
 
     if (appState.gramosSeleccionadosPedido > restante) {
-        alertaEl.textContent = `No podes pedir ${appState.gramosSeleccionadosPedido}g. Te quedan ${restante}g en este ciclo.`;
+        alertaEl.textContent = `No podés pedir ${appState.gramosSeleccionadosPedido}g. Te quedan ${restante}g en este ciclo.`;
         botonEl.disabled = true;
         return;
     }
@@ -78,11 +78,11 @@ function realizarPedidoProducto() {
         return;
     }
     if (!appState.socioData && !appState.usuarioActual) {
-        mostrarMensaje('Inicia sesion para pedir.', false);
+        mostrarMensaje('Iniciá sesión para pedir.', false);
         return;
     }
     if (!appState.gramosSeleccionadosPedido) {
-        mostrarMensaje('Selecciona una cantidad.', false);
+        mostrarMensaje('Seleccioná una cantidad.', false);
         return;
     }
     const totalActual = obtenerTotalPedidoMesActual();
@@ -156,7 +156,7 @@ window.seleccionarImagenProducto = function(indice) {
 };
 
 function renderizarGaleriaProductoModal(imagenes, titulo) {
-    const imagenPrincipal = imagenes[0] || crearPlaceholderConstruccion('Sitio en construccion');
+    const imagenPrincipal = imagenes[0] || crearPlaceholderConstruccion('Sitio en construcción');
     return `
         <div class="modal-galeria horizontal producto-simple">
             <div class="modal-galeria-frame">
@@ -344,16 +344,16 @@ window.enviarCalificacion = async function() {
         return;
     }
     if (!appState.socioData?.id) {
-        mostrarMensaje('Inicia sesion para calificar', false);
+        mostrarMensaje('Iniciá sesión para calificar', false);
         return;
     }
     if (!calificacionSeleccionada) {
-        mostrarMensaje('Selecciona una cantidad de estrellas', false);
+        mostrarMensaje('Seleccioná una cantidad de estrellas', false);
         return;
     }
     const resultado = await calificarProducto(appState.productoModalActual.id, appState.socioData.id, calificacionSeleccionada);
     document.getElementById('calificacionMensaje').innerHTML = resultado.success
-        ? '<span style="color: #8fb86a;">Calificacion enviada</span>'
+        ? '<span style="color: #000000;">Calificación enviada</span>'
         : '<span style="color: #e0b8a0;">Error al calificar</span>';
     if (resultado.success) {
         setTimeout(() => {
@@ -367,6 +367,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formEditProducto')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!appState.productoEditandoId) return;
+        const { data: productoActual } = await supabaseClient
+            .from('productos')
+            .select('imagen_url')
+            .eq('id', appState.productoEditandoId)
+            .single();
         const updates = {
             nombre: document.getElementById('editNombre').value,
             cepa: document.getElementById('editCepa').value,
@@ -377,10 +382,30 @@ document.addEventListener('DOMContentLoaded', () => {
             descripcion: document.getElementById('editDescripcion').value,
             imagen_url: document.getElementById('editImagenUrl').value || null
         };
-        const { error } = await supabaseClient.from('productos').update(updates).eq('id', appState.productoEditandoId);
+        let updatesFinales = updates;
+        if (typeof productosTieneTipoCultivo === 'function') {
+            const incluirTipoCultivo = await productosTieneTipoCultivo();
+            if (!incluirTipoCultivo) {
+                const { tipo_cultivo, ...updatesSinTipo } = updates;
+                updatesFinales = updatesSinTipo;
+            }
+        }
+        let { error } = await supabaseClient.from('productos').update(updatesFinales).eq('id', appState.productoEditandoId);
+        if (error && typeof errorEsColumnaTipoCultivoFaltante === 'function' && errorEsColumnaTipoCultivoFaltante(error)) {
+            const { tipo_cultivo, ...updatesSinTipo } = updates;
+            if (typeof marcarProductosSinTipoCultivo === 'function') marcarProductosSinTipoCultivo();
+            ({ error } = await supabaseClient.from('productos').update(updatesSinTipo).eq('id', appState.productoEditandoId));
+        }
         if (error) {
             mostrarMensaje(`No se pudo actualizar el producto: ${error.message}`, false);
             return;
+        }
+        if (
+            productoActual?.imagen_url &&
+            productoActual.imagen_url !== updates.imagen_url &&
+            typeof eliminarArchivoStoragePorUrl === 'function'
+        ) {
+            await eliminarArchivoStoragePorUrl(productoActual.imagen_url);
         }
         mostrarMensaje('Producto actualizado', true);
         cerrarEditProducto();

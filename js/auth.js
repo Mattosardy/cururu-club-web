@@ -88,12 +88,12 @@ async function iniciarSesion() {
 async function cerrarSesionHandler() {
     const resultado = await cerrarSesion();
     if (!resultado.success) {
-        mostrarMensaje('No se pudo cerrar sesion', false);
+        mostrarMensaje('No se pudo cerrar sesión', false);
         return;
     }
     localStorage.setItem('cururu_seccion_activa', 'inicio');
     await verificarSesion();
-    mostrarMensaje('Sesion cerrada', true);
+    mostrarMensaje('Sesión cerrada', true);
     if (typeof mostrarSeccion === 'function') mostrarSeccion('inicio');
 }
 

@@ -128,7 +128,7 @@ async function confirmarReservaHandler(tipo, gramos) {
     const fechaEntrega = tipo === 'primer' ? appState.fechasEntrega.primerJueves : appState.fechasEntrega.ultimoJueves;
     const horasLimite = tipo === 'primer' ? configSistema.horasLimitePrimer : configSistema.horasLimiteUltimo;
     if (!puedeConfirmar(fechaEntrega, horasLimite)) {
-        mostrarMensaje('El plazo expiro', false);
+        mostrarMensaje('El plazo expiró', false);
         return;
     }
 
@@ -136,7 +136,7 @@ async function confirmarReservaHandler(tipo, gramos) {
     const cicloActual = appState.cicloClubActual || obtenerCicloClub();
     const gramosReservadosCiclo = sumarGramosReservadosEnCiclo(reservas, cicloActual);
     if (gramosReservadosCiclo + gramos > 40) {
-        mostrarMensaje(`No podes superar 40g por ciclo. Te quedan ${Math.max(0, 40 - gramosReservadosCiclo)}g.`, false);
+        mostrarMensaje(`No podés superar 40g por ciclo. Te quedan ${Math.max(0, 40 - gramosReservadosCiclo)}g.`, false);
         return;
     }
 

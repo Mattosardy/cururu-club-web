@@ -135,7 +135,7 @@ function crearPlaceholderConstruccion(titulo = 'Sitio en construcción', detalle
             </defs>
             <rect width="1200" height="800" fill="url(#bg)"/>
             <rect x="70" y="70" width="1060" height="660" rx="36" fill="rgba(8,15,6,0.55)" stroke="#7ca35a" stroke-width="4"/>
-            <text x="600" y="340" fill="#8fb86a" font-family="Poppins, Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle">${titulo}</text>
+            <text x="600" y="340" fill="#000000" font-family="Poppins, Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle">${titulo}</text>
             <text x="600" y="410" fill="#dce8cf" font-family="Open Sans, Arial, sans-serif" font-size="30" text-anchor="middle">${detalle}</text>
         </svg>
     `;
@@ -161,7 +161,7 @@ function normalizarListaImagenes(valor) {
                         .filter((item) => item && !esRutaLocalInvalida(item));
                 }
             } catch (error) {
-                console.warn('No se pudo parsear la galeria de imagenes', error);
+                console.warn('No se pudo parsear la galería de imágenes', error);
             }
         }
         return [limpio];
@@ -204,9 +204,46 @@ function construirHTMLGaleriaHorizontal(imagenes, opciones = {}) {
 }
 
 function aplicarContenidoInstitucional(configMap = {}) {
-    const historiaPrincipal = document.querySelector('.historia-texto > p');
-    if (historiaPrincipal && configMap.historia_texto) {
-        historiaPrincipal.innerHTML = `<strong>Cururu Club</strong> ${escapeHtml(configMap.historia_texto)}`;
+    const historiaPrincipal = document.getElementById('historiaTextoPrincipal');
+    const historiaAdicional = document.getElementById('historiaTextoAdicional');
+    const btnLeerMasHistoria = document.getElementById('btnLeerMasHistoria');
+    const historiaTextoPlano = typeof configMap.historia_texto === 'string' ? configMap.historia_texto.trim() : '';
+    const resumenHistoria = 'Flores de alta calidad y una experiencia cuidada para quienes buscan elegir y consumir de forma consciente.';
+
+    if (historiaPrincipal) {
+        historiaPrincipal.textContent = resumenHistoria;
+    }
+
+    if (historiaAdicional) {
+        let textoAdicional = '';
+        if (historiaTextoPlano) {
+            const textoSinTitulo = historiaTextoPlano.replace(/^Cururú Club Cannábico\s*/i, '').trim();
+            textoAdicional = textoSinTitulo.startsWith(resumenHistoria)
+                ? textoSinTitulo.slice(resumenHistoria.length).trim()
+                : textoSinTitulo;
+        }
+        historiaAdicional.textContent = textoAdicional;
+        historiaAdicional.hidden = !textoAdicional;
+    }
+
+    if (btnLeerMasHistoria) {
+        const hayTextoAdicional = Boolean(historiaAdicional && historiaAdicional.textContent.trim());
+        btnLeerMasHistoria.hidden = !hayTextoAdicional;
+        btnLeerMasHistoria.classList.remove('activo');
+        btnLeerMasHistoria.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar más';
+        if (hayTextoAdicional && historiaAdicional) {
+            historiaAdicional.hidden = true;
+            btnLeerMasHistoria.onclick = () => {
+                const expandido = !historiaAdicional.hidden;
+                historiaAdicional.hidden = expandido;
+                btnLeerMasHistoria.classList.toggle('activo', !expandido);
+                btnLeerMasHistoria.innerHTML = !expandido
+                    ? '<i class="fas fa-chevron-up"></i> Mostrar menos'
+                    : '<i class="fas fa-chevron-down"></i> Mostrar más';
+            };
+        } else {
+            btnLeerMasHistoria.onclick = null;
+        }
     }
 
     const cifraSocios = document.getElementById('cifra-socios');
@@ -221,31 +258,33 @@ function aplicarContenidoInstitucional(configMap = {}) {
     if (historiaMedia && historiaGaleria) {
         const imagenesHistoria = normalizarListaImagenes(configMap.historia_galeria);
         const videoHistoria = String(configMap.historia_video_url || '').trim();
+
         if (imagenesHistoria.length) {
             const imagenPrincipal = obtenerImagenPrincipal(imagenesHistoria, 'Sitio en construcción');
             historiaMedia.innerHTML = `
                 <img
                     src="${imagenPrincipal}"
-                    alt="Historia Cururu Club"
+                    alt="Historia Cururú Club"
                     style="width: 100%; max-height: 300px; border-radius: 16px; object-fit: cover;"
                     onerror="this.onerror=null; this.src='${crearPlaceholderConstruccion('Sitio en construcción')}';"
                 >
             `;
         } else if (videoHistoria) {
             historiaMedia.innerHTML = `
-                <video autoplay muted loop playsinline controls style="width: 100%; max-height: 300px; border-radius: 16px; object-fit: cover;">
+                <video autoplay muted loop playsinline controls style="width: min(100%, 260px); aspect-ratio: 9 / 16; max-height: min(70dvh, 460px); margin: 0 auto; border-radius: 16px; object-fit: cover; background: #111;">
                     <source src="${videoHistoria}">
                     Tu navegador no soporta videos.
                 </video>
             `;
         } else {
             historiaMedia.innerHTML = `
-                <video autoplay muted loop playsinline style="width: 100%; max-height: 300px; border-radius: 16px; object-fit: cover;">
+                <video autoplay muted loop playsinline controls style="width: min(100%, 260px); aspect-ratio: 9 / 16; max-height: min(70dvh, 460px); margin: 0 auto; border-radius: 16px; object-fit: cover; background: #111;">
                     <source src="assets/images/cururu-video.mp4" type="video/mp4">
                     Tu navegador no soporta videos.
                 </video>
             `;
         }
+
         if (imagenesHistoria.length > 1) {
             historiaGaleria.style.display = 'grid';
             historiaGaleria.innerHTML = imagenesHistoria.map((imagen, index) => `
@@ -288,7 +327,7 @@ function inicializarPlaceholders() {
         ctx.fillText(config.text, 200, 140);
         ctx.font = '14px Poppins, Arial';
         ctx.fillStyle = '#a0b890';
-        ctx.fillText('Cururu Club', 200, 170);
+        ctx.fillText('Cururú Club', 200, 170);
         placeholders[name] = canvas.toDataURL('image/jpeg', 0.9);
     });
     localStorage.setItem('cururu_placeholders', JSON.stringify(placeholders));
@@ -309,7 +348,7 @@ window.seleccionarHistoriaImagen = function(indice) {
     historiaMedia.innerHTML = `
         <img
             src="${imagen}"
-            alt="Historia Cururu Club"
+            alt="Historia Cururú Club"
             style="width: 100%; max-height: 300px; border-radius: 16px; object-fit: cover;"
             onerror="this.onerror=null; this.src='${crearPlaceholderConstruccion('Sitio en construcción')}';"
         >

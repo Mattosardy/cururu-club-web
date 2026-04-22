@@ -161,17 +161,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         mostrarPanelLogin();
     });
-
     document.getElementById('formLoginPassword')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = document.getElementById('loginEmailPassword').value;
         const password = document.getElementById('loginPassword').value;
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
-            mostrarMensaje('Email o contrasena incorrectos', false);
+            mostrarMensaje('Email o contraseña incorrectos', false);
             return;
         }
-        mostrarMensaje('Login exitoso', true);
+        mostrarMensaje('Inicio de sesión exitoso', true);
         await verificarSesion();
         await mostrarSeccion('inicio');
     });
