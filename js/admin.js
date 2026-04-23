@@ -551,18 +551,20 @@ async function cargarProductosAdmin() {
         </form>
         <hr>
         ${productos.length ? `
-            <table class="tabla-datos">
+            <div class="admin-tabla-scroll">
+            <table class="tabla-datos admin-productos-tabla">
                 <thead><tr><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Disp.</th><th></th></tr></thead>
                 <tbody>${productos.map((producto) => `
                     <tr>
                         <td>${escapeHtml(producto.nombre)}</td>
                         <td>${escapeHtml(obtenerEtiquetaTipoCultivoAdmin(producto.tipo_cultivo))}</td>
-                        <td><input type="number" step="0.01" value="${producto.precio_por_10g || 1600}" style="width:100px;background:rgba(8,15,6,0.8);border:1px solid #7ca35a;border-radius:8px;padding:5px;color:#e0ecd0;" onchange="actualizarPrecioProductoAdmin('${producto.id}', this.value)"></td>
+                        <td><input type="number" step="0.01" value="${producto.precio_por_10g || 1600}" class="admin-productos-precio" style="background:rgba(8,15,6,0.8);border:1px solid #7ca35a;border-radius:8px;padding:5px;color:#e0ecd0;" onchange="actualizarPrecioProductoAdmin('${producto.id}', this.value)"></td>
                         <td><input type="checkbox" ${producto.disponible !== false ? 'checked' : ''} onchange="actualizarDisponibilidadProductoAdmin('${producto.id}', this.checked)"></td>
-                        <td><button class="btn-editar" onclick="editarProductoAdmin('${producto.id}')">Editar</button> <button class="btn-eliminar" onclick="eliminarProductoAdminClick('${producto.id}')">Eliminar</button></td>
+                        <td><div class="admin-productos-acciones"><button class="btn-editar" onclick="editarProductoAdmin('${producto.id}')">Editar</button><button class="btn-eliminar" onclick="eliminarProductoAdminClick('${producto.id}')">Eliminar</button></div></td>
                     </tr>
                 `).join('')}</tbody>
             </table>
+            </div>
         ` : '<div class="loading">No hay productos todavía.</div>'}
     `;
 

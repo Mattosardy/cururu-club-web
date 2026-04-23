@@ -678,6 +678,50 @@
         .tabla-datos { width: 100%; border-collapse: collapse; }
         .tabla-datos th, .tabla-datos td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(112, 148, 91, 0.2); color: var(--text-main); }
         .tabla-datos th { color: var(--accent-strong); }
+        .admin-tabla-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabla-datos.admin-productos-tabla {
+            min-width: 0;
+            table-layout: fixed;
+        }
+        .tabla-datos.admin-productos-tabla th,
+        .tabla-datos.admin-productos-tabla td {
+            vertical-align: middle;
+            word-break: break-word;
+        }
+        .tabla-datos.admin-productos-tabla th:nth-child(1),
+        .tabla-datos.admin-productos-tabla td:nth-child(1) { width: 28%; }
+        .tabla-datos.admin-productos-tabla th:nth-child(2),
+        .tabla-datos.admin-productos-tabla td:nth-child(2) { width: 18%; }
+        .tabla-datos.admin-productos-tabla th:nth-child(3),
+        .tabla-datos.admin-productos-tabla td:nth-child(3) { width: 18%; }
+        .tabla-datos.admin-productos-tabla th:nth-child(4),
+        .tabla-datos.admin-productos-tabla td:nth-child(4) { width: 12%; text-align: center; }
+        .tabla-datos.admin-productos-tabla th:nth-child(5),
+        .tabla-datos.admin-productos-tabla td:nth-child(5) { width: 12%; }
+        .admin-productos-precio {
+            width: 100% !important;
+            min-width: 0;
+            max-width: 110px;
+            box-sizing: border-box;
+        }
+        .admin-productos-acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-start;
+            max-width: 132px;
+        }
+        .admin-productos-acciones .btn-editar,
+        .admin-productos-acciones .btn-eliminar {
+            flex: 1 1 62px;
+            min-width: 0;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
         .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; }
         .badge-activo { background: #7ca35a; color: #0f190c; }
         .badge-peligro { background: #9B6A6C; color: white; }
@@ -984,6 +1028,16 @@
             #admin-actividades .form-group.full-width,
             #admin-mensajes .form-group.full-width {
                 grid-column: span 1;
+            }
+            #admin-productos .admin-tabla-scroll {
+                overflow-x: auto;
+            }
+            #admin-productos .tabla-datos.admin-productos-tabla {
+                min-width: 560px;
+                table-layout: auto;
+            }
+            #admin-productos .admin-productos-acciones {
+                min-width: 150px;
             }
             .edit-modal {
                 padding: 0;
