@@ -204,10 +204,12 @@ function construirHTMLGaleriaHorizontal(imagenes, opciones = {}) {
 }
 
 function aplicarContenidoInstitucional(configMap = {}) {
+    const historiaTitulo = document.getElementById('historiaTituloPrincipal');
     const historiaPrincipal = document.getElementById('historiaTextoPrincipal');
     const historiaAdicional = document.getElementById('historiaTextoAdicional');
     const btnLeerMasHistoria = document.getElementById('btnLeerMasHistoria');
     const historiaTextoPlano = typeof configMap.historia_texto === 'string' ? configMap.historia_texto.trim() : '';
+    const tituloHistoriaPredeterminado = 'Cururú Club Cannábico';
     const resumenHistoria = 'Flores de alta calidad y una experiencia cuidada para quienes buscan elegir y consumir de forma consciente.';
     const normalizarTextoHistoria = (texto) => String(texto || '')
         .normalize('NFD')
@@ -245,6 +247,23 @@ function aplicarContenidoInstitucional(configMap = {}) {
 
         return bloquesRestantes.join('\n\n').trim();
     };
+
+    const extraerTituloHistoria = (textoCompleto) => {
+        if (!textoCompleto) return tituloHistoriaPredeterminado;
+        const primerBloque = textoCompleto
+            .split(/\r?\n+/)
+            .map((bloque) => bloque.trim())
+            .find(Boolean);
+        if (!primerBloque) return tituloHistoriaPredeterminado;
+        const tituloNormalizado = normalizarTextoHistoria(primerBloque);
+        return tituloNormalizado.includes('cururu club cannabico')
+            ? primerBloque
+            : tituloHistoriaPredeterminado;
+    };
+
+    if (historiaTitulo) {
+        historiaTitulo.textContent = extraerTituloHistoria(historiaTextoPlano);
+    }
 
     if (historiaPrincipal) {
         historiaPrincipal.textContent = resumenHistoria;
