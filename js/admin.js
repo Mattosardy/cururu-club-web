@@ -253,6 +253,7 @@ async function cargarNoticiasAdmin() {
     container.innerHTML = `
         <form id="formNoticiaAdmin">
             <h3>Nueva noticia</h3>
+            <p style="color:var(--text-muted); margin: 8px 0 18px; line-height: 1.5;">Completá título, contenido e imágenes opcionales. La noticia se publica al guardar y luego podés borrarla desde la tabla inferior.</p>
             <div class="form-grid">
                 <div class="form-group full-width"><input type="text" id="noticiaTituloAdmin" placeholder="Título" required></div>
                 <div class="form-group full-width"><textarea id="noticiaContenidoAdmin" rows="4" placeholder="Contenido" required></textarea></div>
@@ -332,6 +333,7 @@ async function cargarActividadesAdmin() {
     container.innerHTML = `
         <form id="formActividadAdmin">
             <h3>Nueva actividad</h3>
+            <p style="color:var(--text-muted); margin: 8px 0 18px; line-height: 1.5;">Usá este formulario para crear actividades, sorteos o regalos. La fecha es obligatoria y el resto de los datos completan la ficha pública.</p>
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label style="color: #c8d8b5;">Tipo</label>
@@ -404,6 +406,7 @@ async function cargarProductosAdmin() {
     container.innerHTML = `
         <form id="formProductoAdmin">
             <h3>Nuevo producto</h3>
+            <p style="color:var(--text-muted); margin: 8px 0 18px; line-height: 1.5;">Cargá nombre, tipo de cultivo, precio base e imágenes. La variedad se mostrará en el catálogo dentro de Invernaculo o Exterior según la opción elegida.</p>
             <div class="form-grid">
                 <div class="form-group full-width"><input type="text" id="productoNombreAdmin" placeholder="Nombre" required></div>
                 <div class="form-group"><input type="text" id="productoCepaAdmin" placeholder="Cepa"></div>

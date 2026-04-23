@@ -68,6 +68,7 @@ function renderizarEditorHistoria(container, opciones = {}) {
 
     container.innerHTML = `
         <h3 style="color:var(--accent-strong);">${escapeHtml(titulo)}</h3>
+        <p style="color:var(--text-muted); margin: 8px 0 18px; line-height: 1.5;">Edita el texto visible en la portada, las cifras destacadas y los recursos multimedia. Guarda solo cuando el contenido principal y el bloque de "Mostrar mas" queden en el orden final.</p>
         <div class="form-grid">
             <div class="form-group full-width">
                 <label>Texto principal</label>
