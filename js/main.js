@@ -5,6 +5,53 @@ const restrictedSections = {
     maestro: ['maestro']
 };
 
+function actualizarBotonAudio() {
+    const audio = document.getElementById('backgroundAudio');
+    const boton = document.getElementById('btnAudioToggle');
+    if (!audio || !boton) return;
+    const icono = boton.querySelector('i');
+    const silenciado = audio.muted;
+    boton.setAttribute('aria-label', silenciado ? 'Activar música' : 'Silenciar música');
+    boton.setAttribute('title', silenciado ? 'Activar música' : 'Silenciar música');
+    if (icono) {
+        icono.className = silenciado ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+    }
+}
+
+async function intentarReproducirAudio() {
+    const audio = document.getElementById('backgroundAudio');
+    if (!audio || audio.muted) return;
+    try {
+        await audio.play();
+    } catch (error) {
+        // Algunos navegadores bloquean autoplay con sonido hasta la primera interacción.
+    }
+}
+
+function inicializarAudioFondo() {
+    const audio = document.getElementById('backgroundAudio');
+    const boton = document.getElementById('btnAudioToggle');
+    if (!audio || !boton) return;
+
+    const silenciadoGuardado = localStorage.getItem('cururu_audio_muted');
+    audio.volume = 0.35;
+    audio.muted = silenciadoGuardado === null ? false : silenciadoGuardado === 'true';
+    actualizarBotonAudio();
+
+    boton.addEventListener('click', async () => {
+        audio.muted = !audio.muted;
+        localStorage.setItem('cururu_audio_muted', String(audio.muted));
+        actualizarBotonAudio();
+        if (!audio.muted) await intentarReproducirAudio();
+    });
+
+    ['pointerdown', 'touchstart', 'keydown'].forEach((eventName) => {
+        document.addEventListener(eventName, intentarReproducirAudio, { passive: true, once: true });
+    });
+
+    void intentarReproducirAudio();
+}
+
 function usuarioPuedeVerSeccion(seccionId) {
     const rolesPermitidos = restrictedSections[seccionId];
     if (!rolesPermitidos) return true;
@@ -125,6 +172,7 @@ async function verificarSesion() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     inicializarPlaceholders();
+    inicializarAudioFondo();
     if (typeof actualizarBotonesSesion === 'function') actualizarBotonesSesion(false);
 
     document.getElementById('btnLogin')?.addEventListener('click', iniciarSesion);

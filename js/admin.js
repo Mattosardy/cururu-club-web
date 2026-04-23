@@ -155,6 +155,28 @@ window.eliminarArchivoStoragePorUrl = eliminarArchivoStoragePorUrl;
 window.eliminarArchivosStoragePorUrls = eliminarArchivosStoragePorUrls;
 
 let cacheProductosTieneTipoCultivo = null;
+let cacheProductosTieneIndicaSativa = null;
+
+function parsearPerfilIndicaSativa(valor) {
+    const texto = String(valor || '').trim();
+    const matchIndica = texto.match(/(\d+(?:[.,]\d+)?)\s*%\s*indica/i);
+    const matchSativa = texto.match(/(\d+(?:[.,]\d+)?)\s*%\s*sativa/i);
+    return {
+        indica: matchIndica ? parseFloat(matchIndica[1].replace(',', '.')) : null,
+        sativa: matchSativa ? parseFloat(matchSativa[1].replace(',', '.')) : null
+    };
+}
+
+function construirPerfilIndicaSativa(indica, sativa) {
+    const indicaNum = Number(indica);
+    const sativaNum = Number(sativa);
+    const indicaValida = Number.isFinite(indicaNum);
+    const sativaValida = Number.isFinite(sativaNum);
+    if (!indicaValida && !sativaValida) return null;
+    const indicaTexto = indicaValida ? `${indicaNum}% Indica` : null;
+    const sativaTexto = sativaValida ? `${sativaNum}% Sativa` : null;
+    return [indicaTexto, sativaTexto].filter(Boolean).join(' - ');
+}
 
 function normalizarTipoCultivoAdmin(tipoCultivo) {
     return String(tipoCultivo || '').trim().toLowerCase() === 'exterior' ? 'exterior' : 'invernaculo';
@@ -170,6 +192,12 @@ function errorEsColumnaTipoCultivoFaltante(error) {
     return codigo === 'PGRST204' || (mensaje.includes('tipo_cultivo') && (mensaje.includes('schema cache') || mensaje.includes('column')));
 }
 
+function errorEsColumnaIndicaSativaFaltante(error) {
+    const mensaje = String(error?.message || '').toLowerCase();
+    const codigo = String(error?.code || '').toUpperCase();
+    return codigo === 'PGRST204' || mensaje.includes('indica_sativa');
+}
+
 async function productosTieneTipoCultivo() {
     if (cacheProductosTieneTipoCultivo !== null) return cacheProductosTieneTipoCultivo;
     const { error } = await supabaseClient.from('productos').select('tipo_cultivo').limit(1);
@@ -177,30 +205,108 @@ async function productosTieneTipoCultivo() {
     return cacheProductosTieneTipoCultivo;
 }
 
+async function productosTieneIndicaSativa() {
+    return cacheProductosTieneIndicaSativa !== false;
+}
+
 function marcarProductosSinTipoCultivo() {
     cacheProductosTieneTipoCultivo = false;
 }
 
+function marcarProductosSinIndicaSativa() {
+    cacheProductosTieneIndicaSativa = false;
+}
+
+async function actualizarProductoConCompatibilidad(id, updates) {
+    const variantes = [];
+    let base = { ...updates };
+
+    const incluirTipoCultivo = await productosTieneTipoCultivo();
+    if (!incluirTipoCultivo) {
+        const { tipo_cultivo, ...sinTipo } = base;
+        base = sinTipo;
+    }
+
+    const incluirIndicaSativa = await productosTieneIndicaSativa();
+    if (!incluirIndicaSativa) {
+        const { indica_sativa, ...sinIndica } = base;
+        base = sinIndica;
+    }
+
+    variantes.push(base);
+
+    const { indica_sativa, ...sinIndicaBase } = base;
+    if (Object.keys(sinIndicaBase).length !== Object.keys(base).length) variantes.push(sinIndicaBase);
+
+    const { tipo_cultivo, ...sinTipoBase } = base;
+    if (Object.keys(sinTipoBase).length !== Object.keys(base).length) variantes.push(sinTipoBase);
+
+    const { tipo_cultivo: _omitTipo, indica_sativa: _omitIndica, ...sinTipoNiIndica } = updates;
+    variantes.push(sinTipoNiIndica);
+
+    const vistas = new Set();
+    const unicas = variantes.filter((variante) => {
+        const clave = JSON.stringify(Object.keys(variante).sort().map((k) => [k, variante[k]]));
+        if (vistas.has(clave)) return false;
+        vistas.add(clave);
+        return true;
+    });
+
+    let ultimoResultado = null;
+    for (const variante of unicas) {
+        ultimoResultado = await supabaseClient.from('productos').update(variante).eq('id', id);
+        if (!ultimoResultado.error) return ultimoResultado;
+
+        if (errorEsColumnaTipoCultivoFaltante(ultimoResultado.error)) marcarProductosSinTipoCultivo();
+        if (errorEsColumnaIndicaSativaFaltante(ultimoResultado.error)) marcarProductosSinIndicaSativa();
+    }
+
+    return ultimoResultado;
+}
+
 async function insertarProductoConCompatibilidad(payload) {
     const incluirTipoCultivo = await productosTieneTipoCultivo();
-    const payloadFinal = incluirTipoCultivo ? payload : (() => {
-        const { tipo_cultivo, ...payloadSinTipo } = payload;
-        return payloadSinTipo;
-    })();
+    const incluirIndicaSativa = await productosTieneIndicaSativa();
+    let payloadFinal = { ...payload };
+    if (!incluirTipoCultivo) {
+        const { tipo_cultivo, ...payloadSinTipo } = payloadFinal;
+        payloadFinal = payloadSinTipo;
+    }
+    if (!incluirIndicaSativa) {
+        const { indica_sativa, ...payloadSinIndica } = payloadFinal;
+        payloadFinal = payloadSinIndica;
+    }
 
     let query = supabaseClient.from('productos').insert([payloadFinal]).select().single();
     let resultado = await query;
-    if (!resultado.error || !errorEsColumnaTipoCultivoFaltante(resultado.error)) return resultado;
+    if (!resultado.error) return resultado;
 
-    marcarProductosSinTipoCultivo();
-    const { tipo_cultivo, ...payloadSinTipo } = payload;
-    return supabaseClient.from('productos').insert([payloadSinTipo]).select().single();
+    let payloadFallback = { ...payload };
+    if (errorEsColumnaTipoCultivoFaltante(resultado.error)) {
+        marcarProductosSinTipoCultivo();
+        const { tipo_cultivo, ...payloadSinTipo } = payloadFallback;
+        payloadFallback = payloadSinTipo;
+    }
+    if (errorEsColumnaIndicaSativaFaltante(resultado.error)) {
+        marcarProductosSinIndicaSativa();
+        const { indica_sativa, ...payloadSinIndica } = payloadFallback;
+        payloadFallback = payloadSinIndica;
+    }
+
+    if (payloadFallback === payload) return resultado;
+    return supabaseClient.from('productos').insert([payloadFallback]).select().single();
 }
 
 window.errorEsColumnaTipoCultivoFaltante = errorEsColumnaTipoCultivoFaltante;
+window.errorEsColumnaIndicaSativaFaltante = errorEsColumnaIndicaSativaFaltante;
 window.insertarProductoConCompatibilidad = insertarProductoConCompatibilidad;
+window.actualizarProductoConCompatibilidad = actualizarProductoConCompatibilidad;
 window.productosTieneTipoCultivo = productosTieneTipoCultivo;
+window.productosTieneIndicaSativa = productosTieneIndicaSativa;
 window.marcarProductosSinTipoCultivo = marcarProductosSinTipoCultivo;
+window.marcarProductosSinIndicaSativa = marcarProductosSinIndicaSativa;
+window.parsearPerfilIndicaSativa = parsearPerfilIndicaSativa;
+window.construirPerfilIndicaSativa = construirPerfilIndicaSativa;
 
 async function cargarAdminData() {
     const cards = document.getElementById('adminCards');

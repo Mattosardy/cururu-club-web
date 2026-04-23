@@ -4,6 +4,8 @@ window.configSistema = {
     horasLimiteUltimo: 72
 };
 
+window.defaultHistoriaVideoUrl = 'https://qjiqbcokhlwisxbeplym.supabase.co/storage/v1/object/public/noticias/historia_video_1776899904368_g07gbj3gkwn.mp4';
+
 window.appState = {
     usuarioActual: null,
     rolUsuario: 'invitado',
@@ -14,6 +16,7 @@ window.appState = {
     gramosSeleccionadosPedido: null,
     galeriaActual: { imagenes: [], indice: 0, productoId: null },
     historiaGaleria: [],
+    historiaVideoActual: window.defaultHistoriaVideoUrl,
     noticiaGaleriaActual: { imagenes: [], indice: 0 },
     cicloClubActual: null,
     gramosReservadosCiclo: 0,

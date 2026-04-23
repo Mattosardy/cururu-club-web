@@ -298,6 +298,12 @@ window.editarProductoAdmin = async function(id) {
     document.getElementById('editCepa').value = data.cepa || '';
     document.getElementById('editThc').value = data.thc_porcentaje || '';
     document.getElementById('editCbd').value = data.cbd_porcentaje || '';
+    const perfilIndicaSativa = typeof parsearPerfilIndicaSativa === 'function'
+        ? parsearPerfilIndicaSativa(data.indica_sativa)
+        : { indica: null, sativa: null };
+    document.getElementById('editIndicaPorcentaje').value = perfilIndicaSativa.indica ?? '';
+    document.getElementById('editSativaPorcentaje').value = perfilIndicaSativa.sativa ?? '';
+    sincronizarPerfilDesdeIndica();
     document.getElementById('editTipoCultivo').value = normalizarTipoCultivoEdicion(data.tipo_cultivo);
     document.getElementById('editPrecio').value = data.precio_por_10g || 1600;
     document.getElementById('editDescripcion').value = data.descripcion || '';
@@ -313,6 +319,31 @@ function cerrarEditProducto() {
 }
 
 window.cerrarEditProducto = cerrarEditProducto;
+
+function normalizarPorcentajePerfil(valor) {
+    const numero = Number(valor);
+    if (!Number.isFinite(numero)) return '';
+    const ajustado = Math.max(0, Math.min(100, Math.round(numero / 10) * 10));
+    return String(ajustado);
+}
+
+function sincronizarPerfilDesdeIndica() {
+    const indicaInput = document.getElementById('editIndicaPorcentaje');
+    const sativaInput = document.getElementById('editSativaPorcentaje');
+    if (!indicaInput || !sativaInput) return;
+    const indica = normalizarPorcentajePerfil(indicaInput.value);
+    indicaInput.value = indica;
+    if (indica !== '') sativaInput.value = String(100 - Number(indica));
+}
+
+function sincronizarPerfilDesdeSativa() {
+    const indicaInput = document.getElementById('editIndicaPorcentaje');
+    const sativaInput = document.getElementById('editSativaPorcentaje');
+    if (!indicaInput || !sativaInput) return;
+    const sativa = normalizarPorcentajePerfil(sativaInput.value);
+    sativaInput.value = sativa;
+    if (sativa !== '') indicaInput.value = String(100 - Number(sativa));
+}
 
 let calificacionSeleccionada = 0;
 
@@ -374,6 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof configurarInputImagenesConLimite === 'function') {
         configurarInputImagenesConLimite('editImagenFile', 'editImagenPreview', 'productos');
     }
+    document.getElementById('editIndicaPorcentaje')?.addEventListener('change', sincronizarPerfilDesdeIndica);
+    document.getElementById('editSativaPorcentaje')?.addEventListener('change', sincronizarPerfilDesdeSativa);
     document.getElementById('formEditProducto')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!appState.productoEditandoId) return;
@@ -400,25 +433,21 @@ document.addEventListener('DOMContentLoaded', () => {
             cepa: document.getElementById('editCepa').value,
             thc_porcentaje: parseFloat(document.getElementById('editThc').value) || null,
             cbd_porcentaje: parseFloat(document.getElementById('editCbd').value) || null,
+            indica_sativa: typeof construirPerfilIndicaSativa === 'function'
+                ? construirPerfilIndicaSativa(
+                    document.getElementById('editIndicaPorcentaje').value,
+                    document.getElementById('editSativaPorcentaje').value
+                )
+                : null,
             tipo_cultivo: normalizarTipoCultivoEdicion(document.getElementById('editTipoCultivo').value),
             precio_por_10g: parseFloat(document.getElementById('editPrecio').value) || 1600,
             descripcion: document.getElementById('editDescripcion').value,
             imagen_url: imagenUrlEditada
         };
-        let updatesFinales = updates;
-        if (typeof productosTieneTipoCultivo === 'function') {
-            const incluirTipoCultivo = await productosTieneTipoCultivo();
-            if (!incluirTipoCultivo) {
-                const { tipo_cultivo, ...updatesSinTipo } = updates;
-                updatesFinales = updatesSinTipo;
-            }
-        }
-        let { error } = await supabaseClient.from('productos').update(updatesFinales).eq('id', appState.productoEditandoId);
-        if (error && typeof errorEsColumnaTipoCultivoFaltante === 'function' && errorEsColumnaTipoCultivoFaltante(error)) {
-            const { tipo_cultivo, ...updatesSinTipo } = updates;
-            if (typeof marcarProductosSinTipoCultivo === 'function') marcarProductosSinTipoCultivo();
-            ({ error } = await supabaseClient.from('productos').update(updatesSinTipo).eq('id', appState.productoEditandoId));
-        }
+        const resultadoActualizacion = typeof actualizarProductoConCompatibilidad === 'function'
+            ? await actualizarProductoConCompatibilidad(appState.productoEditandoId, updates)
+            : await supabaseClient.from('productos').update(updates).eq('id', appState.productoEditandoId);
+        let { error } = resultadoActualizacion || {};
         if (error) {
             mostrarMensaje(`No se pudo actualizar el producto: ${error.message}`, false);
             return;

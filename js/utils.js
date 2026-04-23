@@ -110,10 +110,10 @@ function obtenerIdentificadorSocioPedido() {
 
 function obtenerImagenFallback(producto) {
     const nombre = String(producto?.nombre || '').toLowerCase();
-    if (nombre.includes('cururu')) return 'assets/images/cururu-dream.jpg';
-    if (nombre.includes('sapo')) return 'assets/images/sapo-kush.jpg';
-    if (nombre.includes('rana')) return 'assets/images/rana-verde.jpg';
-    return 'assets/images/cururu-dream.jpg';
+    if (nombre.includes('cururu')) return crearPlaceholderConstruccion('Cururu Dream', 'Imagen en actualizacion');
+    if (nombre.includes('sapo')) return crearPlaceholderConstruccion('Sapo Kush', 'Imagen en actualizacion');
+    if (nombre.includes('rana')) return crearPlaceholderConstruccion('Rana Verde', 'Imagen en actualizacion');
+    return crearPlaceholderConstruccion('Cururu Club', 'Imagen en actualizacion');
 }
 
 function esRutaLocalInvalida(valor) {
@@ -298,10 +298,25 @@ function aplicarContenidoInstitucional(configMap = {}) {
     const historiaMedia = document.getElementById('historiaMediaPrincipal');
     const historiaGaleria = document.getElementById('historiaGaleria');
     if (historiaMedia && historiaGaleria) {
+        const esInvitado = appState.rolUsuario === 'invitado';
+        const videoActualEnPantalla = historiaMedia.querySelector('video source')?.src || historiaMedia.querySelector('video')?.currentSrc || '';
         const imagenesHistoria = normalizarListaImagenes(configMap.historia_galeria);
+        const videoGuardado = localStorage.getItem('cururu_historia_video_url') || '';
         const videoHistoria = String(configMap.historia_video_url || '').trim();
+        if (videoHistoria) {
+            appState.historiaVideoActual = videoHistoria;
+            localStorage.setItem('cururu_historia_video_url', videoHistoria);
+        }
+        const videoPresentacion = videoHistoria || appState.historiaVideoActual || videoGuardado || videoActualEnPantalla || window.defaultHistoriaVideoUrl || '';
 
-        if (imagenesHistoria.length) {
+        if (esInvitado && videoPresentacion) {
+            historiaMedia.innerHTML = `
+                <video autoplay muted defaultMuted loop playsinline style="width: min(100%, 260px); aspect-ratio: 9 / 16; max-height: min(70dvh, 460px); margin: 0 auto; border-radius: 16px; object-fit: cover; background: #111; pointer-events: none;" disablepictureinpicture controlslist="nodownload nofullscreen noplaybackrate">
+                    <source src="${videoPresentacion}" type="video/mp4">
+                    Tu navegador no soporta videos.
+                </video>
+            `;
+        } else if (imagenesHistoria.length) {
             const imagenPrincipal = obtenerImagenPrincipal(imagenesHistoria, 'Sitio en construcción');
             historiaMedia.innerHTML = `
                 <img
@@ -311,23 +326,23 @@ function aplicarContenidoInstitucional(configMap = {}) {
                     onerror="this.onerror=null; this.src='${crearPlaceholderConstruccion('Sitio en construcción')}';"
                 >
             `;
-        } else if (videoHistoria) {
+        } else if (videoPresentacion) {
             historiaMedia.innerHTML = `
                 <video autoplay muted loop playsinline controls style="width: min(100%, 260px); aspect-ratio: 9 / 16; max-height: min(70dvh, 460px); margin: 0 auto; border-radius: 16px; object-fit: cover; background: #111;">
-                    <source src="${videoHistoria}">
+                    <source src="${videoPresentacion}">
                     Tu navegador no soporta videos.
                 </video>
             `;
         } else {
             historiaMedia.innerHTML = `
                 <video autoplay muted loop playsinline controls style="width: min(100%, 260px); aspect-ratio: 9 / 16; max-height: min(70dvh, 460px); margin: 0 auto; border-radius: 16px; object-fit: cover; background: #111;">
-                    <source src="assets/images/cururu-video.mp4" type="video/mp4">
+                    <source src="${videoPresentacion}" type="video/mp4">
                     Tu navegador no soporta videos.
                 </video>
             `;
         }
 
-        if (imagenesHistoria.length > 1) {
+        if (!esInvitado && imagenesHistoria.length > 1) {
             historiaGaleria.style.display = 'grid';
             historiaGaleria.innerHTML = imagenesHistoria.map((imagen, index) => `
                 <button
@@ -342,7 +357,7 @@ function aplicarContenidoInstitucional(configMap = {}) {
         } else {
             historiaGaleria.style.display = 'none';
             historiaGaleria.innerHTML = '';
-            appState.historiaGaleria = imagenesHistoria;
+            appState.historiaGaleria = esInvitado ? [] : imagenesHistoria;
         }
     }
 }

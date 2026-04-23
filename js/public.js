@@ -9,12 +9,27 @@ async function cargarContenidoInstitucional() {
             if (item.clave === 'horas_limite_primer') configSistema.horasLimitePrimer = parseInt(item.valor, 10);
             if (item.clave === 'horas_limite_ultimo') configSistema.horasLimiteUltimo = parseInt(item.valor, 10);
         });
+        const videoGuardado = localStorage.getItem('cururu_historia_video_url') || '';
+        const videoHistoria = String(configMap.historia_video_url || videoGuardado || window.defaultHistoriaVideoUrl || '').trim();
+        if (videoHistoria) {
+            configMap.historia_video_url = videoHistoria;
+            appState.historiaVideoActual = videoHistoria;
+            localStorage.setItem('cururu_historia_video_url', videoHistoria);
+        }
 
         aplicarContenidoInstitucional(configMap);
         return configMap;
     } catch (error) {
         console.warn('No se pudo cargar la configuración del sitio', error);
-        return {};
+        const configMap = {};
+        const videoGuardado = localStorage.getItem('cururu_historia_video_url') || '';
+        const videoHistoria = String(videoGuardado || window.defaultHistoriaVideoUrl || '').trim();
+        if (videoHistoria) {
+            configMap.historia_video_url = videoHistoria;
+            appState.historiaVideoActual = videoHistoria;
+        }
+        aplicarContenidoInstitucional(configMap);
+        return configMap;
     }
 }
 
