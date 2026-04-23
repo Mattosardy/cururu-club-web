@@ -142,6 +142,14 @@ window.eliminarArchivosStoragePorUrls = eliminarArchivosStoragePorUrls;
 
 let cacheProductosTieneTipoCultivo = null;
 
+function normalizarTipoCultivoAdmin(tipoCultivo) {
+    return String(tipoCultivo || '').trim().toLowerCase() === 'exterior' ? 'exterior' : 'invernaculo';
+}
+
+function obtenerEtiquetaTipoCultivoAdmin(tipoCultivo) {
+    return normalizarTipoCultivoAdmin(tipoCultivo) === 'exterior' ? 'Exterior' : 'Invernaculo';
+}
+
 function errorEsColumnaTipoCultivoFaltante(error) {
     const mensaje = String(error?.message || '').toLowerCase();
     const codigo = String(error?.code || '').toUpperCase();
@@ -403,11 +411,11 @@ async function cargarProductosAdmin() {
                 <div class="form-group"><input type="number" step="0.1" id="productoCbdAdmin" placeholder="CBD %"></div>
                 <div class="form-group">
                     <select id="productoTipoCultivoAdmin">
-                        <option value="indoor">Indoor</option>
+                        <option value="invernaculo">Invernaculo</option>
                         <option value="exterior">Exterior</option>
                     </select>
                 </div>
-                <div class="form-group"><input type="number" step="0.01" id="productoPrecioAdmin" placeholder="Precio 10g" value="1600"></div>
+                <div class="form-group"><input type="number" step="0.01" id="productoPrecioAdmin" placeholder="Precio base" value="1600"></div>
                 <div class="form-group full-width"><textarea id="productoDescripcionAdmin" rows="3" placeholder="Descripción"></textarea></div>
                 <div class="form-group full-width"><textarea id="productoImagenAdmin" rows="3" placeholder="URLs de imagen opcionales, una por línea"></textarea></div>
                 <div class="form-group full-width">
@@ -425,7 +433,7 @@ async function cargarProductosAdmin() {
                 <tbody>${productos.map((producto) => `
                     <tr>
                         <td>${escapeHtml(producto.nombre)}</td>
-                        <td>${escapeHtml(producto.tipo_cultivo === 'exterior' ? 'Exterior' : 'Indoor')}</td>
+                        <td>${escapeHtml(obtenerEtiquetaTipoCultivoAdmin(producto.tipo_cultivo))}</td>
                         <td><input type="number" step="0.01" value="${producto.precio_por_10g || 1600}" style="width:100px;background:rgba(8,15,6,0.8);border:1px solid #7ca35a;border-radius:8px;padding:5px;color:#e0ecd0;" onchange="actualizarPrecioProductoAdmin('${producto.id}', this.value)"></td>
                         <td><input type="checkbox" ${producto.disponible !== false ? 'checked' : ''} onchange="actualizarDisponibilidadProductoAdmin('${producto.id}', this.checked)"></td>
                         <td><button class="btn-editar" onclick="editarProductoAdmin('${producto.id}')">Editar</button> <button class="btn-eliminar" onclick="eliminarProductoAdminClick('${producto.id}')">Eliminar</button></td>
@@ -461,7 +469,7 @@ async function cargarProductosAdmin() {
             cepa: document.getElementById('productoCepaAdmin').value,
             thc_porcentaje: parseFloat(document.getElementById('productoThcAdmin').value) || null,
             cbd_porcentaje: parseFloat(document.getElementById('productoCbdAdmin').value) || null,
-            tipo_cultivo: document.getElementById('productoTipoCultivoAdmin').value || 'indoor',
+            tipo_cultivo: normalizarTipoCultivoAdmin(document.getElementById('productoTipoCultivoAdmin').value),
             precio_por_10g: parseFloat(document.getElementById('productoPrecioAdmin').value) || 1600,
             descripcion: document.getElementById('productoDescripcionAdmin').value,
             imagen_url: imagenes[0] || null,

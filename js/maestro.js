@@ -67,7 +67,7 @@ function renderizarEditorHistoria(container, opciones = {}) {
     } = opciones;
 
     container.innerHTML = `
-        <h3 style="color:#e0ecd0;">${escapeHtml(titulo)}</h3>
+        <h3 style="color:var(--accent-strong);">${escapeHtml(titulo)}</h3>
         <div class="form-grid">
             <div class="form-group full-width">
                 <label>Texto principal</label>

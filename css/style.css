@@ -274,11 +274,11 @@ body::before {
 }
 .thc-badge {
     display: inline-block;
-    background: rgba(100, 80, 70, 0.8);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.75rem;
     margin-top: 12px;
+    background: rgba(100, 80, 70, 0.8);
     color: #e0ecd0;
 }
 .btn-mas-info:hover {
@@ -464,6 +464,9 @@ body::before {
     border-radius: 12px;
     padding: 12px;
     color: #e0ecd0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 .calendario-grid {
     display: grid;
@@ -908,6 +911,17 @@ body::before {
     }
     #historia-completa {
         padding: 7px;
+    }
+    #admin-productos .form-grid {
+        grid-template-columns: 1fr;
+    }
+    #admin-productos .form-group.full-width {
+        grid-column: span 1;
+    }
+    #admin-productos .tabla-datos {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 @media (max-width: 520px) {

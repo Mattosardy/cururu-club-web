@@ -102,6 +102,7 @@ set search_path = public
 as $$
 declare
     scheduled_count integer := 0;
+    inserted_count integer := 0;
     ultimo_jueves date := public.ultimo_jueves_del_mes(target_date);
     primer_jueves date := public.primer_jueves_del_mes(target_date);
     fecha_recordatorio_ultimo date := (public.ultimo_jueves_del_mes(target_date) - interval '7 days')::date;
@@ -143,7 +144,8 @@ begin
                 and np.metadata ->> 'target_month' = to_char(target_date, 'YYYY-MM')
           );
 
-        get diagnostics scheduled_count = row_count;
+        get diagnostics inserted_count = row_count;
+        scheduled_count := scheduled_count + inserted_count;
     end if;
 
     if target_date = fecha_recordatorio_primer then
@@ -182,7 +184,8 @@ begin
                 and np.metadata ->> 'target_month' = to_char(target_date, 'YYYY-MM')
           );
 
-        get diagnostics scheduled_count = scheduled_count + row_count;
+        get diagnostics inserted_count = row_count;
+        scheduled_count := scheduled_count + inserted_count;
     end if;
 
     return scheduled_count;

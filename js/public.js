@@ -76,7 +76,7 @@ function ordenarProductosParaCatalogo(productos) {
 }
 
 function normalizarTipoCultivo(tipoCultivo) {
-    return String(tipoCultivo || '').trim().toLowerCase() === 'exterior' ? 'exterior' : 'indoor';
+    return String(tipoCultivo || '').trim().toLowerCase() === 'exterior' ? 'exterior' : 'invernaculo';
 }
 
 function obtenerTituloTipoCultivo(tipoCultivo) {
@@ -186,13 +186,13 @@ async function cargarProductosPublicos() {
     }));
 
     const productosOrdenados = ordenarProductosParaCatalogo(productosConCalificaciones);
-    const grupos = { indoor: [], exterior: [] };
+    const grupos = { invernaculo: [], exterior: [] };
 
     productosOrdenados.forEach((producto) => {
         grupos[normalizarTipoCultivo(producto.tipo_cultivo)].push(producto);
     });
 
-    container.innerHTML = ['indoor', 'exterior'].map((tipoCultivo) => `
+    container.innerHTML = ['invernaculo', 'exterior'].map((tipoCultivo) => `
         <div class="productos-columna">
             <h3 class="productos-columna-titulo">${obtenerTituloTipoCultivo(tipoCultivo)}</h3>
             <div class="productos-lista">

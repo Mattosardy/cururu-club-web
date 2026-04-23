@@ -209,6 +209,42 @@ function aplicarContenidoInstitucional(configMap = {}) {
     const btnLeerMasHistoria = document.getElementById('btnLeerMasHistoria');
     const historiaTextoPlano = typeof configMap.historia_texto === 'string' ? configMap.historia_texto.trim() : '';
     const resumenHistoria = 'Flores de alta calidad y una experiencia cuidada para quienes buscan elegir y consumir de forma consciente.';
+    const normalizarTextoHistoria = (texto) => String(texto || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s.-]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+
+    const extraerTextoAdicionalHistoria = (textoCompleto) => {
+        if (!textoCompleto) return '';
+
+        const bloques = textoCompleto
+            .split(/\r?\n+/)
+            .map((bloque) => bloque.trim())
+            .filter(Boolean);
+
+        if (!bloques.length) return '';
+
+        const resumenNormalizado = normalizarTextoHistoria(resumenHistoria);
+        const primerBloqueNormalizado = normalizarTextoHistoria(bloques[0]);
+        const primerBloqueEsTitulo = primerBloqueNormalizado.includes('cururu club cannabico');
+        let bloquesRestantes = primerBloqueEsTitulo ? bloques.slice(1) : [...bloques];
+
+        if (!bloquesRestantes.length) return '';
+
+        if (normalizarTextoHistoria(bloquesRestantes[0]) === resumenNormalizado) {
+            bloquesRestantes = bloquesRestantes.slice(1);
+        } else {
+            const textoUnido = bloquesRestantes.join('\n\n').trim();
+            if (normalizarTextoHistoria(textoUnido).startsWith(resumenNormalizado)) {
+                return textoUnido.slice(resumenHistoria.length).trim();
+            }
+        }
+
+        return bloquesRestantes.join('\n\n').trim();
+    };
 
     if (historiaPrincipal) {
         historiaPrincipal.textContent = resumenHistoria;
@@ -224,6 +260,12 @@ function aplicarContenidoInstitucional(configMap = {}) {
         }
         historiaAdicional.textContent = textoAdicional;
         historiaAdicional.hidden = !textoAdicional;
+    }
+
+    if (historiaAdicional) {
+        const textoAdicionalCorregido = extraerTextoAdicionalHistoria(historiaTextoPlano);
+        historiaAdicional.textContent = textoAdicionalCorregido;
+        historiaAdicional.hidden = !textoAdicionalCorregido;
     }
 
     if (btnLeerMasHistoria) {

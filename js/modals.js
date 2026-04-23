@@ -10,6 +10,10 @@ function guardarPedidosProductos(pedidos) {
     localStorage.setItem('cururu_pedidos_productos', JSON.stringify(pedidos));
 }
 
+function normalizarTipoCultivoEdicion(tipoCultivo) {
+    return String(tipoCultivo || '').trim().toLowerCase() === 'exterior' ? 'exterior' : 'invernaculo';
+}
+
 function obtenerTotalPedidoMesActual() {
     const socioId = obtenerIdentificadorSocioPedido();
     const cicloActual = obtenerCicloClub();
@@ -253,8 +257,9 @@ async function abrirModal(producto) {
     document.getElementById('calificacionMensaje').innerHTML = '';
     calificacionSeleccionada = 0;
 
+    const opcionesDisponibles = [20, 40];
     const opcionesContainer = document.getElementById('opcionesPedido');
-    opcionesContainer.innerHTML = [20, 40].map((gramos) => {
+    opcionesContainer.innerHTML = opcionesDisponibles.map((gramos) => {
         const precioTotal = (precioBase * gramos / 10).toFixed(0);
         return `<button type="button" class="opcion-pedido" data-gramos="${gramos}" data-precio="${precioTotal}">${gramos}g - $${precioTotal}</button>`;
     }).join('');
@@ -293,7 +298,7 @@ window.editarProductoAdmin = async function(id) {
     document.getElementById('editCepa').value = data.cepa || '';
     document.getElementById('editThc').value = data.thc_porcentaje || '';
     document.getElementById('editCbd').value = data.cbd_porcentaje || '';
-    document.getElementById('editTipoCultivo').value = data.tipo_cultivo === 'exterior' ? 'exterior' : 'indoor';
+    document.getElementById('editTipoCultivo').value = normalizarTipoCultivoEdicion(data.tipo_cultivo);
     document.getElementById('editPrecio').value = data.precio_por_10g || 1600;
     document.getElementById('editDescripcion').value = data.descripcion || '';
     document.getElementById('editImagenUrl').value = data.imagen_url || '';
@@ -377,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cepa: document.getElementById('editCepa').value,
             thc_porcentaje: parseFloat(document.getElementById('editThc').value) || null,
             cbd_porcentaje: parseFloat(document.getElementById('editCbd').value) || null,
-            tipo_cultivo: document.getElementById('editTipoCultivo').value || 'indoor',
+            tipo_cultivo: normalizarTipoCultivoEdicion(document.getElementById('editTipoCultivo').value),
             precio_por_10g: parseFloat(document.getElementById('editPrecio').value) || 1600,
             descripcion: document.getElementById('editDescripcion').value,
             imagen_url: document.getElementById('editImagenUrl').value || null
