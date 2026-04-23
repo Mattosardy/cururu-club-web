@@ -302,11 +302,13 @@ window.editarProductoAdmin = async function(id) {
     document.getElementById('editPrecio').value = data.precio_por_10g || 1600;
     document.getElementById('editDescripcion').value = data.descripcion || '';
     document.getElementById('editImagenUrl').value = data.imagen_url || '';
+    if (typeof limpiarInputImagenes === 'function') limpiarInputImagenes('editImagenFile', 'editImagenPreview');
     document.getElementById('editProductoModal').style.display = 'flex';
 };
 
 function cerrarEditProducto() {
     document.getElementById('editProductoModal').style.display = 'none';
+    if (typeof limpiarInputImagenes === 'function') limpiarInputImagenes('editImagenFile', 'editImagenPreview');
     appState.productoEditandoId = null;
 }
 
@@ -369,6 +371,9 @@ window.enviarCalificacion = async function() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (typeof configurarInputImagenesConLimite === 'function') {
+        configurarInputImagenesConLimite('editImagenFile', 'editImagenPreview', 'productos');
+    }
     document.getElementById('formEditProducto')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!appState.productoEditandoId) return;
@@ -377,6 +382,19 @@ document.addEventListener('DOMContentLoaded', () => {
             .select('imagen_url')
             .eq('id', appState.productoEditandoId)
             .single();
+        let imagenUrlEditada = document.getElementById('editImagenUrl').value || null;
+        const imagenesEditadas = typeof obtenerArchivosAcumulados === 'function'
+            ? obtenerArchivosAcumulados('editImagenFile')
+            : document.getElementById('editImagenFile')?.files;
+        if (imagenesEditadas?.length) {
+            try {
+                const subidas = await subirMultiplesImagenes('productos', imagenesEditadas, 'producto_edit');
+                imagenUrlEditada = subidas[0] || imagenUrlEditada;
+            } catch (error) {
+                mostrarMensaje(`No se pudo subir la imagen: ${error.message}`, false);
+                return;
+            }
+        }
         const updates = {
             nombre: document.getElementById('editNombre').value,
             cepa: document.getElementById('editCepa').value,
@@ -385,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tipo_cultivo: normalizarTipoCultivoEdicion(document.getElementById('editTipoCultivo').value),
             precio_por_10g: parseFloat(document.getElementById('editPrecio').value) || 1600,
             descripcion: document.getElementById('editDescripcion').value,
-            imagen_url: document.getElementById('editImagenUrl').value || null
+            imagen_url: imagenUrlEditada
         };
         let updatesFinales = updates;
         if (typeof productosTieneTipoCultivo === 'function') {

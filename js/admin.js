@@ -73,6 +73,20 @@ function configurarInputImagenesConLimite(inputId, previewId, contexto) {
     });
 }
 
+function limpiarInputImagenes(inputId, previewId) {
+    archivosAcumuladosPorInput[inputId] = [];
+    const input = document.getElementById(inputId);
+    if (input) input.value = '';
+
+    const preview = document.getElementById(previewId);
+    if (preview) {
+        preview.innerHTML = '';
+        preview.style.display = '';
+    }
+}
+
+window.limpiarInputImagenes = limpiarInputImagenes;
+
 async function subirMultiplesImagenes(bucket, files, prefijo) {
     const imagenes = [];
     for (const file of Array.from(files || [])) {
