@@ -618,6 +618,7 @@
         .form-group input, .form-group textarea, .form-group select {
             background: rgba(255, 255, 255, 0.82); border: 1px solid var(--border-soft);
             border-radius: 12px; padding: 12px; color: var(--text-strong);
+            width: 100%; max-width: 100%; box-sizing: border-box;
         }
         .calendario-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
         .productos-subsection { margin-top: 30px; }
@@ -928,6 +929,26 @@
             .nav-admin-btn, .nav-maestro-btn { padding: 8px 18px; font-size: 0.85rem; }
             .admin-charts-row { grid-template-columns: 1fr; }
             .admin-chart-card { min-height: 200px; }
+            #admin .form-grid,
+            #maestro .form-grid,
+            #admin-historia .form-grid,
+            #maestro-historia .form-grid,
+            #admin-noticias .form-grid,
+            #admin-productos .form-grid,
+            #admin-actividades .form-grid,
+            #admin-mensajes .form-grid {
+                grid-template-columns: 1fr;
+            }
+            #admin .form-group.full-width,
+            #maestro .form-group.full-width,
+            #admin-historia .form-group.full-width,
+            #maestro-historia .form-group.full-width,
+            #admin-noticias .form-group.full-width,
+            #admin-productos .form-group.full-width,
+            #admin-actividades .form-group.full-width,
+            #admin-mensajes .form-group.full-width {
+                grid-column: span 1;
+            }
         }
         @media (max-width: 520px) {
             .section { padding: 18px 14px; border-radius: 20px; }
