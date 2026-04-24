@@ -5,8 +5,26 @@
 
 const SUPABASE_URL = 'https://qjiqbcokhlwisxbeplym.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqaXFiY29raGx3aXN4YmVwbHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTc3MjgsImV4cCI6MjA5MDI3MzcyOH0._bRZjYV1Ly30T-g4zuI7GNNTRnZtnD9HTamojbP3xnY';
+const SUPABASE_PROJECT_REF = 'qjiqbcokhlwisxbeplym';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function errorEsRefreshTokenInvalido(error) {
+    const mensaje = String(error?.message || '').toLowerCase();
+    return mensaje.includes('invalid refresh token') || mensaje.includes('refresh token not found');
+}
+
+function limpiarSesionLocalSupabase() {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        const prefijo = `sb-${SUPABASE_PROJECT_REF}-`;
+        Object.keys(localStorage).forEach((clave) => {
+            if (clave.startsWith(prefijo)) localStorage.removeItem(clave);
+        });
+    } catch (error) {
+        console.warn('No se pudo limpiar la sesiÃ³n local de Supabase:', error);
+    }
+}
 
 // ============================================
 // PRUEBA DE CONEXIÓN
@@ -155,6 +173,10 @@ async function obtenerUsuarioActual() {
         if (error) throw error;
         return user;
     } catch (error) {
+        if (errorEsRefreshTokenInvalido(error)) {
+            limpiarSesionLocalSupabase();
+            return null;
+        }
         if (error?.message !== 'Auth session missing!') {
             console.error('Error al obtener usuario:', error.message);
         }
