@@ -98,6 +98,21 @@ function obtenerTituloTipoCultivo(tipoCultivo) {
     return tipoCultivo === 'exterior' ? 'Exterior' : 'Invernáculo';
 }
 
+function inicializarAcordeonesProductos() {
+    document.querySelectorAll('.productos-toggle').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+            const columna = toggle.closest('.productos-columna');
+            const lista = columna?.querySelector('.productos-lista');
+            if (!columna || !lista) return;
+
+            const expandido = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', String(!expandido));
+            lista.hidden = expandido;
+            columna.classList.toggle('activa', !expandido);
+        });
+    });
+}
+
 function renderizarTarjetaProducto(producto) {
     const imagenes = normalizarListaImagenes(producto.imagen_url);
     const imagenPrincipal = imagenes[0] || obtenerImagenFallback(producto) || crearPlaceholderConstruccion('Sitio en construcción');
@@ -209,12 +224,19 @@ async function cargarProductosPublicos() {
 
     container.innerHTML = ['invernaculo', 'exterior'].map((tipoCultivo) => `
         <div class="productos-columna">
-            <h3 class="productos-columna-titulo">${obtenerTituloTipoCultivo(tipoCultivo)}</h3>
-            <div class="productos-lista">
+            <h3 class="productos-columna-titulo">
+                <button type="button" class="productos-toggle" aria-expanded="false">
+                    <span>${obtenerTituloTipoCultivo(tipoCultivo)}</span>
+                    <i class="fas fa-chevron-down productos-toggle-icono" aria-hidden="true"></i>
+                </button>
+            </h3>
+            <div class="productos-lista" hidden>
                 ${grupos[tipoCultivo].length ? grupos[tipoCultivo].map((producto) => renderizarTarjetaProducto(producto)).join('') : '<div class="productos-vacio">No hay variedades en esta columna.</div>'}
             </div>
         </div>
     `).join('');
+
+    inicializarAcordeonesProductos();
 
     document.querySelectorAll('.producto-card').forEach((card) => {
         card.addEventListener('click', (event) => {

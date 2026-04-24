@@ -388,6 +388,7 @@ async function cargarNoticiasAdmin() {
         </form>
         <hr>
         ${noticias.length ? `
+            <div class="admin-tabla-scroll">
             <table class="tabla-datos">
                 <thead><tr><th>Fecha</th><th>Título</th><th>Imagen</th><th>Acciones</th></tr></thead>
                 <tbody>${noticias.map((noticia) => `
@@ -399,6 +400,7 @@ async function cargarNoticiasAdmin() {
                     </tr>
                 `).join('')}</tbody>
             </table>
+            </div>
         ` : '<div class="loading">No hay noticias todavía.</div>'}
     `;
 
@@ -473,6 +475,7 @@ async function cargarActividadesAdmin() {
         </form>
         <hr>
         ${actividades.length ? `
+            <div class="admin-tabla-scroll">
             <table class="tabla-datos">
                 <thead><tr><th>Fecha</th><th>Tipo</th><th>Título</th><th></th></tr></thead>
                 <tbody>${actividades.map((actividad) => `
@@ -484,6 +487,7 @@ async function cargarActividadesAdmin() {
                     </tr>
                 `).join('')}</tbody>
             </table>
+            </div>
         ` : '<div class="loading">No hay actividades todavía.</div>'}
     `;
 
@@ -662,6 +666,7 @@ async function cargarSolicitudesAdmin() {
         return;
     }
     container.innerHTML = (data || []).length ? `
+        <div class="admin-tabla-scroll">
         <table class="tabla-datos">
             <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Telefono</th><th>Acciones</th></tr></thead>
             <tbody>${data.map((solicitud) => `
@@ -674,6 +679,7 @@ async function cargarSolicitudesAdmin() {
                 </tr>
             `).join('')}</tbody>
         </table>
+        </div>
     ` : '<div class="loading">No hay solicitudes pendientes.</div>';
 }
 
@@ -720,6 +726,7 @@ async function cargarSociosAdmin() {
         return;
     }
     container.innerHTML = (data || []).length ? `
+        <div class="admin-tabla-scroll">
         <table class="tabla-datos">
             <thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead>
             <tbody>${data.map((socio) => `
@@ -731,6 +738,7 @@ async function cargarSociosAdmin() {
                 </tr>
             `).join('')}</tbody>
         </table>
+        </div>
     ` : '<div class="loading">No hay socios.</div>';
 }
 
@@ -743,6 +751,7 @@ async function cargarReservasAdmin() {
         return;
     }
     container.innerHTML = (data || []).length ? `
+        <div class="admin-tabla-scroll">
         <table class="tabla-datos">
             <thead><tr><th>Fecha</th><th>Socio</th><th>Cantidad</th><th>Estado</th></tr></thead>
             <tbody>${data.map((reserva) => `
@@ -754,6 +763,7 @@ async function cargarReservasAdmin() {
                 </tr>
             `).join('')}</tbody>
         </table>
+        </div>
     ` : '<div class="loading">No hay reservas.</div>';
 }
 
