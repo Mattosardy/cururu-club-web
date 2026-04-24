@@ -71,15 +71,27 @@
             gap: 18px;
             box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
         }
+        .header-main {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            width: 100%;
+        }
         .header-left, .header-right { display: flex; align-items: center; gap: 18px; }
         .header-left {
             min-width: 0;
             flex: 1 1 auto;
-            justify-content: space-between;
         }
         .header-right {
             flex: 0 0 auto;
             justify-content: flex-end;
+            align-self: flex-start;
+        }
+        .logo {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
         .logo h1 {
             font-family: 'Poppins', sans-serif;
@@ -111,10 +123,13 @@
         .header-nav {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
             flex-wrap: wrap;
-            flex: 1 1 auto;
+            width: 100%;
+            margin-top: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(88, 136, 59, 0.16);
         }
         .mobile-brand { display: none; }
         .mobile-hidden-dock { display: none; }
@@ -876,30 +891,35 @@
                 box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
             }
             .header-left, .header-right {
-                width: 100%;
+                width: auto;
                 justify-content: space-between;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
+                gap: 12px;
+            }
+            .header-main {
+                flex-direction: row;
+                align-items: flex-start;
                 gap: 12px;
             }
             .header-nav {
                 position: static;
-                display: flex;
-                flex-wrap: wrap;
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 10px;
                 padding: 0;
+                margin-top: 10px;
+                padding-top: 12px;
+                width: 100%;
                 border-radius: 0;
                 background: transparent;
-                border: none;
+                border-top: 1px solid rgba(88, 136, 59, 0.16);
                 box-shadow: none;
             }
             .mobile-brand {
                 display: none;
             }
             .header-nav .nav-btn {
-                flex: 1 1 calc(25% - 8px);
-            }
-            .header-nav .nav-audio-btn {
-                flex: 0 0 42px;
+                width: 100%;
             }
             .nav-session-btn {
                 flex: 1 1 100% !important;
@@ -919,12 +939,14 @@
                 max-width: 24ch;
             }
             .header-right {
-                display: block;
+                display: flex;
+                justify-content: flex-end;
+                width: auto;
             }
             .user-info {
-                width: 100%;
+                width: auto;
                 min-width: 0;
-                justify-content: center;
+                justify-content: flex-end;
                 padding: 0;
                 gap: 8px;
                 border-radius: 0;
@@ -944,14 +966,8 @@
                 margin: 0;
                 font-size: 1rem;
             }
-            #btnLogin {
-                display: none !important;
-            }
             .mobile-hidden-dock {
-                display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 10px;
-                width: 100%;
+                display: none !important;
             }
             .mobile-hidden-dock .dock-btn {
                 display: flex;
@@ -979,13 +995,6 @@
             .mobile-hidden-dock .dock-btn span {
                 display: block;
                 width: 100%;
-            }
-            .header-nav [data-section="inicio"],
-            .header-nav [data-section="productos"],
-            .header-nav [data-section="admin"],
-            .header-nav [data-section="maestro"],
-            #mobileBtnLogin {
-                display: none !important;
             }
             .nav-btn {
                 text-align: center;
@@ -1100,7 +1109,7 @@
             .section-title { font-size: 1.2rem; gap: 8px; }
             .header { padding: 10px 12px; border-radius: 22px; }
             .header-nav .nav-btn {
-                flex-basis: calc(25% - 6px);
+                min-width: 0;
             }
             .header-nav .nav-audio-btn {
                 flex-basis: 40px;
@@ -1156,41 +1165,42 @@
 
 <div class="container">
     <div class="header">
-        <div class="header-left">
-            <div class="logo">
-                <h1><img src="assets/images/logo.png" alt="Logo Cururú Club" class="logo-mark" onerror="this.style.display='none'"> Cururú Club</h1>
-                <p>Club Canábico · Cultura · Comunidad</p>
-            </div>
-            <div class="header-nav" id="navContainer">
-                <div class="mobile-brand">
-                    <img src="assets/images/logo.png" alt="Logo Cururú Club" class="logo-mark" onerror="this.style.display='none'">
-                    <div class="mobile-brand-copy">
-                        <span class="mobile-brand-title">Cururú Club</span>
-                        <small>Club Canábico · Cultura · Comunidad</small>
-                    </div>
+        <div class="header-main">
+            <div class="header-left">
+                <div class="logo">
+                    <h1><img src="assets/images/logo.png" alt="Logo Cururú Club" class="logo-mark" onerror="this.style.display='none'"> Cururú Club</h1>
+                    <p>Club Canábico · Cultura · Comunidad</p>
                 </div>
-                <button class="nav-btn nav-audio-btn" id="btnAudioToggle" type="button" aria-label="Silenciar música" title="Silenciar música">
-                    <i class="fas fa-volume-high"></i>
-                </button>
-                <button class="nav-btn active" data-section="inicio"><i class="fas fa-house"></i><span>Inicio</span></button>
-                <button class="nav-btn" data-section="productos"><i class="fas fa-leaf"></i><span>Productos</span></button>
-                <button class="nav-btn admin-only" data-section="admin" style="display: none;"><i class="fas fa-sliders"></i><span>Admin</span></button>
-                <button class="nav-btn maestro-only" data-section="maestro" style="display: none;"><i class="fas fa-crown"></i><span>Maestro</span></button>
+            </div>
+            <div class="header-right">
+                <div class="user-info" id="userInfo">
+                    <span id="userName">Invitado</span>
+                    <button class="nav-btn nav-audio-btn" id="btnAudioToggle" type="button" aria-label="Silenciar música" title="Silenciar música">
+                        <i class="fas fa-volume-high"></i>
+                    </button>
+                    <div class="mobile-hidden-dock">
+                        <button class="dock-btn" data-section="inicio" id="dockBtnInicio"><i class="fas fa-house"></i><span>Inicio</span></button>
+                        <button class="dock-btn" data-section="productos" id="dockBtnProductos"><i class="fas fa-leaf"></i><span>Productos</span></button>
+                        <button class="dock-btn admin-only" data-section="admin" id="dockBtnAdmin" style="display: none;"><i class="fas fa-sliders"></i><span>Admin</span></button>
+                        <button id="dockBtnLogin" class="dock-btn" style="display: none;"><i class="fas fa-sign-in-alt"></i><span>Ingresar</span></button>
+                    </div>
+                    <button id="btnLogin" class="btn-inicio" style="display: none;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
+                    <button id="btnLogout" class="btn-cerrar" style="display: none;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+                </div>
             </div>
         </div>
-        <div class="header-right">
-            <div class="user-info" id="userInfo">
-                <span id="userName">Invitado</span>
-                <div class="mobile-hidden-dock">
-                    <button class="dock-btn" data-section="inicio" id="dockBtnInicio"><i class="fas fa-house"></i><span>Inicio</span></button>
-                    <button class="dock-btn" data-section="productos" id="dockBtnProductos"><i class="fas fa-leaf"></i><span>Productos</span></button>
-                    <button class="dock-btn admin-only" data-section="admin" id="dockBtnAdmin" style="display: none;"><i class="fas fa-sliders"></i><span>Admin</span></button>
-                    <button class="dock-btn maestro-only" data-section="maestro" id="dockBtnMaestro" style="display: none;"><i class="fas fa-crown"></i><span>Maestro</span></button>
-                    <button id="dockBtnLogin" class="dock-btn" style="display: none;"><i class="fas fa-sign-in-alt"></i><span>Ingresar</span></button>
+        <div class="header-nav" id="navContainer">
+            <div class="mobile-brand">
+                <img src="assets/images/logo.png" alt="Logo Cururú Club" class="logo-mark" onerror="this.style.display='none'">
+                <div class="mobile-brand-copy">
+                    <span class="mobile-brand-title">Cururú Club</span>
+                    <small>Club Canábico · Cultura · Comunidad</small>
                 </div>
-                <button id="btnLogin" class="btn-inicio" style="display: none;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-                <button id="btnLogout" class="btn-cerrar" style="display: none;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
             </div>
+            <button class="nav-btn active" data-section="inicio"><i class="fas fa-house"></i><span>Inicio</span></button>
+            <button class="nav-btn" data-section="productos"><i class="fas fa-leaf"></i><span>Productos</span></button>
+            <button class="nav-btn admin-only" data-section="admin" id="navBtnAdmin" style="display: none;"><i class="fas fa-sliders"></i><span>Admin</span></button>
+            <button class="nav-btn maestro-only" data-section="maestro" id="navBtnMaestro" style="display: none;"><i class="fas fa-crown"></i><span>Maestro</span></button>
         </div>
     </div>
 
