@@ -101,13 +101,24 @@ function obtenerTituloTipoCultivo(tipoCultivo) {
 function inicializarAcordeonesProductos() {
     document.querySelectorAll('.productos-toggle').forEach((toggle) => {
         toggle.addEventListener('click', () => {
+            const tipoCultivo = toggle.dataset.tipoCultivo;
             const columna = toggle.closest('.productos-columna');
-            const lista = columna?.querySelector('.productos-lista');
-            if (!columna || !lista) return;
+            const panel = document.querySelector(`.productos-panel[data-tipo-cultivo="${tipoCultivo}"]`);
+            if (!columna || !panel) return;
 
             const expandido = toggle.getAttribute('aria-expanded') === 'true';
+            document.querySelectorAll('.productos-columna.activa').forEach((columnaActiva) => {
+                if (columnaActiva === columna) return;
+                const toggleActivo = columnaActiva.querySelector('.productos-toggle');
+                if (toggleActivo) toggleActivo.setAttribute('aria-expanded', 'false');
+                columnaActiva.classList.remove('activa');
+            });
+            document.querySelectorAll('.productos-panel').forEach((panelActivo) => {
+                if (panelActivo !== panel) panelActivo.hidden = true;
+            });
+
             toggle.setAttribute('aria-expanded', String(!expandido));
-            lista.hidden = expandido;
+            panel.hidden = expandido;
             columna.classList.toggle('activa', !expandido);
         });
     });
@@ -222,19 +233,28 @@ async function cargarProductosPublicos() {
         grupos[normalizarTipoCultivo(producto.tipo_cultivo)].push(producto);
     });
 
-    container.innerHTML = ['invernaculo', 'exterior'].map((tipoCultivo) => `
-        <div class="productos-columna">
-            <h3 class="productos-columna-titulo">
-                <button type="button" class="productos-toggle" aria-expanded="false">
-                    <span>${obtenerTituloTipoCultivo(tipoCultivo)}</span>
-                    <i class="fas fa-chevron-down productos-toggle-icono" aria-hidden="true"></i>
-                </button>
-            </h3>
-            <div class="productos-lista" hidden>
-                ${grupos[tipoCultivo].length ? grupos[tipoCultivo].map((producto) => renderizarTarjetaProducto(producto)).join('') : '<div class="productos-vacio">No hay variedades en esta columna.</div>'}
-            </div>
+    const tiposCultivo = ['invernaculo', 'exterior'];
+    container.innerHTML = `
+        <div class="productos-controles">
+            ${tiposCultivo.map((tipoCultivo) => `
+                <div class="productos-columna">
+                    <h3 class="productos-columna-titulo">
+                        <button type="button" class="productos-toggle" data-tipo-cultivo="${tipoCultivo}" aria-expanded="false">
+                            <span>${obtenerTituloTipoCultivo(tipoCultivo)}</span>
+                            <i class="fas fa-chevron-down productos-toggle-icono" aria-hidden="true"></i>
+                        </button>
+                    </h3>
+                </div>
+            `).join('')}
         </div>
-    `).join('');
+        ${tiposCultivo.map((tipoCultivo) => `
+            <div class="productos-panel" data-tipo-cultivo="${tipoCultivo}" hidden>
+                <div class="productos-lista">
+                    ${grupos[tipoCultivo].length ? grupos[tipoCultivo].map((producto) => renderizarTarjetaProducto(producto)).join('') : '<div class="productos-vacio">No hay variedades en esta columna.</div>'}
+                </div>
+            </div>
+        `).join('')}
+    `;
 
     inicializarAcordeonesProductos();
 

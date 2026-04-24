@@ -66,14 +66,15 @@
             padding: 14px 22px;
             border: 1px solid var(--border-soft);
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            gap: 18px;
+            align-items: stretch;
+            gap: 14px;
             box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
         }
         .header-main {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
             gap: 18px;
             width: 100%;
@@ -86,7 +87,7 @@
         .header-right {
             flex: 0 0 auto;
             justify-content: flex-end;
-            align-self: flex-start;
+            align-self: center;
         }
         .logo {
             display: flex;
@@ -110,39 +111,52 @@
             flex-shrink: 0;
         }
         .user-info {
-            background: rgba(240, 247, 236, 0.95);
-            padding: 8px 14px;
-            border-radius: 50px;
+            background: rgba(240, 247, 236, 0.92);
+            border: 1px solid rgba(88, 136, 59, 0.18);
+            padding: 6px;
+            border-radius: 18px;
             color: var(--text-strong);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
-        .user-info span { color: var(--accent-strong); font-weight: bold; }
+        .user-info span {
+            color: var(--accent-strong);
+            font-weight: 700;
+            padding: 0 8px;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .header-nav {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
             width: 100%;
-            margin-top: 10px;
-            padding-top: 12px;
+            margin-top: 0;
+            padding: 12px;
             border-top: 1px solid rgba(88, 136, 59, 0.16);
+            background: rgba(240, 247, 236, 0.45);
+            border-radius: 18px;
         }
         .mobile-brand { display: none; }
         .mobile-hidden-dock { display: none; }
         .btn-inicio, .btn-cerrar {
             background: rgba(236, 244, 232, 0.95);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 50px;
+            border: 1px solid rgba(88, 136, 59, 0.16);
+            min-height: 42px;
+            padding: 8px 14px;
+            border-radius: 14px;
             color: var(--text-strong);
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+            font-weight: 700;
         }
         .btn-inicio:hover, .btn-cerrar:hover { background: #7ca35a; color: #0f190c; transform: translateY(-2px); }
         .btn-cerrar { background: rgba(155, 106, 108, 0.8); }
@@ -150,13 +164,19 @@
         .nav-btn {
             background: var(--surface-soft);
             border: 1px solid var(--border-soft);
-            padding: 8px 16px;
-            border-radius: 50px;
+            min-height: 42px;
+            padding: 9px 16px;
+            border-radius: 14px;
             color: var(--text-main);
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.88rem;
+            font-weight: 700;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .nav-btn i { font-size: 0.95rem; }
         .nav-btn:hover, .nav-btn.active { background: #7ca35a; color: #0f190c; border-color: #7ca35a; transform: translateY(-2px); }
@@ -363,7 +383,13 @@
             text-align: left;
             white-space: pre-line;
         }
-        .productos-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+        .productos-grid { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
+        .productos-controles {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            align-items: start;
+        }
         .productos-columna {
             min-width: 0;
             background: rgba(8, 15, 6, 0.28);
@@ -401,11 +427,17 @@
         .productos-columna.activa .productos-toggle-icono {
             transform: rotate(180deg);
         }
+        .productos-panel {
+            min-width: 0;
+        }
+        .productos-panel[hidden] {
+            display: none;
+        }
         .productos-lista {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 20px;
-            padding: 0 18px 18px;
+            padding: 0;
         }
         .productos-lista[hidden] {
             display: none;
@@ -898,7 +930,7 @@
             }
             .header-main {
                 flex-direction: row;
-                align-items: flex-start;
+                align-items: center;
                 gap: 12px;
             }
             .header-nav {
@@ -951,6 +983,8 @@
                 gap: 8px;
                 border-radius: 0;
                 background: transparent;
+                border: 0;
+                box-shadow: none;
             }
             .user-info span {
                 display: none;
@@ -1136,9 +1170,10 @@
                 padding: 0;
                 gap: 8px;
             }
-            .productos-grid { grid-template-columns: 1fr; gap: 12px; }
+            .productos-grid { gap: 12px; }
+            .productos-controles { grid-template-columns: 1fr; gap: 12px; }
             .productos-toggle { font-size: 0.88rem; letter-spacing: 0.05em; padding: 15px 16px; }
-            .productos-lista { gap: 12px; }
+            .productos-lista { grid-template-columns: 1fr; gap: 12px; }
             .producto-miniatura { height: 132px; }
             .producto-detalle { padding: 11px 10px 10px; }
             .producto-nombre { font-size: 0.95rem !important; line-height: 1.2; }
